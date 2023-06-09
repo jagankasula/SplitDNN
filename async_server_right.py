@@ -1,27 +1,19 @@
-from http import client
-from unittest import result
-import tornado.ioloop
-import tornado.web
+import concurrent
 import json
 import numpy as np
-
-import concurrent
-from tornado import gen, httpclient, ioloop, queues
-
-import json
-
-import torch.distributed.rpc as rpc
-import torch
-
-import torchvision.transforms as transforms
-from PIL import Image
-from torch.nn.modules.container import Sequential
-import torch.nn as nn
-import torchvision.models as models
 import time
+import torch
+import torch.nn as nn
+import tornado.ioloop
+import tornado.web
+import warnings
+
+from tornado import gen, httpclient, ioloop, queues
+from torch.nn.modules.container import Sequential
 from utils import Config, Flatten, Logger, NumpyArrayEncoder, my_models
 
-import warnings
+
+
 warnings.filterwarnings('ignore')
 
 config = Config.get_config()
