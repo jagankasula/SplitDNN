@@ -28,8 +28,8 @@ class NumpyArrayEncoder(JSONEncoder):
     
 class Logger():
     def log(message):
-        time_start = datetime.datetime.now()
-        print(f"{time_start}::{message}")
+        time = datetime.datetime.now()
+        print(f"{time}::{message}")
 
 class Flatten(nn.Module):
     def __init__(self):
