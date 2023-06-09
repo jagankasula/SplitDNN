@@ -86,6 +86,9 @@ def handle_response(response):
     load_data = json.loads(response.body)
     result = load_data['result']
     count_return = load_data['count']
+
+    Logger.log(f'[Inside handle_response] [Frame: {count_return}] Server response timestamp')
+
     result_right_np = np.asarray(result)
     result_right = torch.Tensor(result_right_np)
 
@@ -162,21 +165,16 @@ def producer_video_left(img):
 
 def convert_image_to_tensor(img):
 
-    Logger.log(f'[Inside convert_image_to_tensor]:: start line')
     local_start_time = datetime.datetime.now()
 
     img_rgb = Image.fromarray(img).convert('RGB')
     resize = transforms.Resize([224, 224])
     img_rgb = resize(img_rgb)
 
-    Logger.log(f'[Inside convert_image_to_tensor]:: after resize')
     to_tensor = transforms.ToTensor()
     tensor = to_tensor(img_rgb)
-    Logger.log(f'[Inside convert_image_to_tensor]:: after to_tensor')
     tensor = tensor.unsqueeze(0)
-    Logger.log(f'[Inside convert_image_to_tensor]:: after unsqueeze')
     tensor = tensor.to(device)
-    Logger.log(f'[Inside convert_image_to_tensor]:: after to(device)')
     local_end_time = datetime.datetime.now()
 
     Logger.log(f'[Inside convert_image_to_tensor] [FRAME: {frame_count}] Time taken to convert frame to tensor and transfer it to device:: {local_end_time - local_start_time} ')
