@@ -1,1 +1,7 @@
 server - "KC-SCER-FCCT0M3"
+
+pgrep -f your_script_name.py  --> to know process Id
+
+nvidia-smi --> To know gpu memory usage
+
+nvidia-smi --query-compute-apps=pid,used_memory --format=csv | awk -F, '$1=="process_id"{print $2}'  --> GPU usage of a process.
