@@ -162,17 +162,21 @@ def producer_video_left(img):
 
 def convert_image_to_tensor(img):
 
+    Logger.log(f'[Inside convert_image_to_tensor]:: start line')
     local_start_time = datetime.datetime.now()
 
     img_rgb = Image.fromarray(img).convert('RGB')
     resize = transforms.Resize([224, 224])
     img_rgb = resize(img_rgb)
 
+    Logger.log(f'[Inside convert_image_to_tensor]:: after resize')
     to_tensor = transforms.ToTensor()
     tensor = to_tensor(img_rgb)
+    Logger.log(f'[Inside convert_image_to_tensor]:: after to_tensor')
     tensor = tensor.unsqueeze(0)
+    Logger.log(f'[Inside convert_image_to_tensor]:: after unsqueeze')
     tensor = tensor.to(device)
-
+    Logger.log(f'[Inside convert_image_to_tensor]:: after to(device)')
     local_end_time = datetime.datetime.now()
 
     Logger.log(f'[Inside convert_image_to_tensor] [FRAME: {frame_count}] Time taken to convert frame to tensor and transfer it to device:: {local_end_time - local_start_time} ')
