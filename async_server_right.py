@@ -72,7 +72,7 @@ def model_right(data):
     print(f"Sending data to the right side of the model: {count}")
 
 
-    out_right=resnet_right(result_left)
+    out_right=resnet_right(result_left.to(device))
     out_right=out_right.cpu()
     #log(f"Receiving data from right side of the model: {count}")
     result_right_np = out_right.detach().numpy()
