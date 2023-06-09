@@ -222,7 +222,7 @@ async def main_runner():
     # This is the end of the left processing. Set the end time of left video processing.
     end_time = datetime.datetime.now()
 
-    print(f'[Inside main_runner] TOTAL TIME TAKEN FOR LEFT PROCESSING {frame_count} frames:: {end_time - start_time}')
+    print(f'[Inside main_runner] TOTAL TIME TAKEN FOR LEFT PROCESSING {frames_to_process} frames:: {end_time - start_time}')
 
     cam.release()
     cv2.destroyAllWindows()
