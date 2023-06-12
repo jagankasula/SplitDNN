@@ -99,12 +99,12 @@ def handle_response(response):
     #print(f"Final Result: {results}")
     #print(f"Final Result for Image number {count}: {results}")
     end_time = datetime.datetime.now()
-    time = (end_time - start_time) * 8
+    time = (end_time - start_time).total_seconds()
 
     Logger.log(f'[Inside handle_response] [FRAME: {count_return}] Total processing time: {time}')
 
     if total_handled_responses == frames_to_process:
-        Logger.log(f'TOTAL TIME FOR PROCESSING:: {time}')
+        Logger.log(f'TOTAL TIME FOR PROCESSING:: {time} sec')
 
 
 async def consumer():
@@ -206,15 +206,13 @@ async def main_runner():
         # If the frame exists
         if ret: 
 
-            with concurrent.futures.ThreadPoolExecutor() as pool:
-
                 # Send the frame for left processing.
 
-                Logger.log(f'[Inside main_runner] [FRAME: {frame_count}] Sending frame for left processing')
+            Logger.log(f'[Inside main_runner] [FRAME: {frame_count}] Sending frame for left processing')
 
-                out_left = await io_loop.run_in_executor(pool, producer_video_left, img_rbg)
+            out_left = producer_video_left(img_rbg)
 
-                Logger.log(f'[Inside main_runner] [FRAME: {frame_count}] Received frame after left processing')
+            Logger.log(f'[Inside main_runner] [FRAME: {frame_count}] Received frame after left processing')
 
             await q.put(out_left)
 
