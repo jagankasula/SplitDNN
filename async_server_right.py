@@ -53,12 +53,9 @@ class ModelHandler(tornado.web.RequestHandler):
         self.write("Model done")
     async def post(self):
         #data = json.loads(self.request.body)
-        with concurrent.futures.ThreadPoolExecutor() as pool:
-            data = await io_loop.run_in_executor(pool, json.loads, self.request.body)
-        with concurrent.futures.ThreadPoolExecutor() as pool:
-            json_dump_return_data = await io_loop.run_in_executor(pool, model_right, data)
-        with concurrent.futures.ThreadPoolExecutor() as pool:
-            await io_loop.run_in_executor(pool, self.write, json_dump_return_data)
+            data =  json.loads(self.request.body)
+            json_dump_return_data = model_right(data)
+            self.write(json_dump_return_data)
 
 def model_right(data):
     #time.sleep(2)    

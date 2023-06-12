@@ -5,3 +5,16 @@ pgrep -f your_script_name.py  --> to know process Id
 nvidia-smi --> To know gpu memory usage
 
 nvidia-smi --query-compute-apps=pid,used_memory --format=csv | awk -F, '$1=="process_id"{print $2}'  --> GPU usage of a process.
+
+
+1997 MiB
+
+Server start - 655 MiB
+
+Initial: Split - 1, frames - 1 - 771 MiB
+
+Final: Split - 1, frames -1 - 1577 MiB
+
+Max limit - 1997 MiB
+
+Final: Split - 1, frames -1 - 1770 MiB
