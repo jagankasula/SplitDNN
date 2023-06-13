@@ -18,3 +18,8 @@ Final: Split - 1, frames -1 - 1577 MiB
 Max limit - 1997 MiB
 
 Final: Split - 1, frames -1 - 1770 MiB
+
+
+293.561156 sec - split 1 , 300 frames , cpu -gpu
+
+14.618504 sec -split 21, 300 frames, cpu -gpu

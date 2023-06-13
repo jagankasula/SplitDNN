@@ -51,6 +51,9 @@ consumer_frame_count = 1
 # Track total responses handled.
 total_handled_responses = 0
 
+# Time for encoding.
+total_encoding_time = 0
+
 
 torch_utils = torch.hub.load('NVIDIA/DeepLearningExamples:torchhub', 'nvidia_convnets_processing_utils')
 
@@ -104,12 +107,14 @@ def handle_response(response):
     Logger.log(f'[Inside handle_response] [FRAME: {count_return}] Total processing time: {time}')
 
     if total_handled_responses == frames_to_process:
-        Logger.log(f'TOTAL TIME FOR PROCESSING:: {time} sec')
+        Logger.log(f'TOTAL TIME FOR ENCODING:: {total_encoding_time} sec')
+        Logger.log(f'TOTAL TIME FOR PROCESSING:: {time} sec')        
 
 
 async def consumer():
 
     global consumer_frame_count
+    global total_encoding_time
 
     http_client = httpclient.AsyncHTTPClient(defaults=dict(connect_timeout = 10000000.0 ,request_timeout=100000000000.0))
     
@@ -124,8 +129,13 @@ async def consumer():
             item_np = item.detach().numpy()
 
             post_data = {'data': item_np, 'count': consumer_frame_count}
-            body = json.dumps(post_data, cls = NumpyArrayEncoder)
 
+            encoding_time_start = datetime.datetime.now()
+            body = json.dumps(post_data, cls = NumpyArrayEncoder)
+            encoding_time_end = datetime.datetime.now()
+
+            total_encoding_time += (encoding_time_end - encoding_time_start).total_seconds()
+            
             # Sending HTTP request to server.
             Logger.log(f'[Inside consumer] [Frame: {consumer_frame_count}] Send HTTP request to server.')
             response =  http_client.fetch(url,  method = 'POST', headers = None, body = body)
@@ -137,11 +147,11 @@ async def consumer():
         finally:
             q.task_done()
 
-    consumer_endTime = datetime.datetime.now()
+            consumer_endTime = datetime.datetime.now()
 
-    Logger.log(f'[Inside consumer] CONSUMER END TIME.')
+            Logger.log(f'[Inside consumer] CONSUMER END TIME.')
 
-    Logger.log(f'[Inside consumer] TOTAL TIME TAKEN BY CONSUMER:: {consumer_endTime - consumer_startTime}')
+            Logger.log(f'[Inside consumer] TOTAL TIME TAKEN BY CONSUMER:: {consumer_endTime - consumer_startTime}')
             
 
 def producer_video_left(img):

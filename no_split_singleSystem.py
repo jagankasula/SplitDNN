@@ -71,7 +71,7 @@ for sub_model in sub_models:
 
 
 all_modules = nn.Sequential(*all_modules)
-all_modules = list(all_modules.children())[:-1]
+all_modules = list(all_modules.children())[:21]
 
 resnet_all = nn.Sequential(*all_modules)
 resnet_all = resnet_all.eval().to(device)

@@ -4,6 +4,6 @@
     "split_point": 1,
     "client_device": "cpu:0",
     "server_device": "cuda:0",
-    "frames_to_process": 20,
+    "frames_to_process": 50,
     "url": "http://{{server}}:8881/model"
 }
