@@ -26,7 +26,7 @@ utils = torch.hub.load('NVIDIA/DeepLearningExamples:torchhub', 'nvidia_convnets_
 device = 'cpu'
 
 # Load a pretrained ResNet-50 model.
-r_50 = models.resnet101(pretrained=True)
+r_50 = models.resnet50(pretrained=True)
 
 # Add r_50 model in to a list of models.
 r_models = [r_50]
@@ -136,7 +136,7 @@ def main_runner():
             else:
                 break
             
-        write_to_csv('output.csv', split_point, (total_time_for_split_point) * 8, sys.getsizeof(request_json))
+        write_to_csv('output.csv', split_point, (total_time_for_split_point.total_seconds()))
 
         cam.release()
         cv2.destroyAllWindows()
@@ -194,7 +194,7 @@ def send_request(request_body, endpoint):
     return response
 
 
-def write_to_csv(filename, data1, data2, size):
+def write_to_csv(filename, data1, data2):
     # Check if the file exists
     file_exists = False
     try:
@@ -210,10 +210,10 @@ def write_to_csv(filename, data1, data2, size):
 
         # Write a new line if the file is empty
         if not file_exists:
-            writer.writerow(['Split no.', 'Total time taken', 'size'])  # Example column headers
+            writer.writerow(['Split no.', 'Total time taken'])  # Example column headers
 
         # Write the data to the file
-        writer.writerow([data1, data2, size])
+        writer.writerow([data1, data2])
 
 
 # Driver code.
