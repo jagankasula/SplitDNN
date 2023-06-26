@@ -17,49 +17,49 @@ with tf.device(device):
   
 model.summary()
 
-physical_devices = tf.config.list_physical_devices()
+# physical_devices = tf.config.list_physical_devices()
 
-print(physical_devices)
+# print(physical_devices)
 
-# layers = model.layers
+layers = model.layers
 
-# for layer in layers:
-#   print(layer)
+for layer in layers:
+  print(layer)
 
-# split_point = 3
-# split_layer = model.layers[split_point]
-# next_layer = model.layers[split_point + 1]
+split_point = 3
+split_layer = model.layers[split_point]
+next_layer = model.layers[split_point + 1]
 
-# print('----------------------- SPLIT LAYER OUTPUT SHAPE -----------------------')
-# print(split_layer.output_shape)
+print('----------------------- SPLIT LAYER OUTPUT SHAPE -----------------------')
+print(split_layer.output_shape)
 
-# print('----------------------- NEXT LAYER INPUT SHAPE -----------------------')
-# print(next_layer.input_shape)
+print('----------------------- NEXT LAYER INPUT SHAPE -----------------------')
+print(next_layer.input_shape)
 
-# print(split_layer.name)
-# print(next_layer.name)
+print(split_layer.name)
+print(next_layer.name)
 
-# left_model = keras.Model(inputs=model.input, outputs=split_layer.output)
-# right_model = keras.Model(inputs=next_layer.input, outputs=model.output)
+left_model = keras.Model(inputs=model.input, outputs=split_layer.output)
+right_model = keras.Model(inputs=next_layer.input, outputs=model.output)
 
-# print('----------------------- LEFT MODEL -----------------------')
-# print(left_model)
-# print('----------------------- RIGHT MODEL -----------------------')
-# print(right_model)
+print('----------------------- LEFT MODEL -----------------------')
+print(left_model)
+print('----------------------- RIGHT MODEL -----------------------')
+print(right_model)
 
-# input_image = np.random.rand(1, 224, 224, 3)  # Shape: (batch_size, image_size, image_size, num_channels)
+input_image = np.random.rand(1, 224, 224, 3)  # Shape: (batch_size, image_size, image_size, num_channels)
 
-# # Pass the input image to the model for inference
-# left_output = left_model(input_image)
+# Pass the input image to the model for inference
+left_output = left_model(input_image)
 
-# right_input = None
+right_input = None
 
-# if split_point < 5:
-#   right_input = left_output
-# else:
-#   right_input = left_output[0]
+if split_point < 5:
+  right_input = left_output
+else:
+  right_input = left_output[0]
 
-# output = right_model(right_input)
+output = right_model(right_input)
 
-# # The output will be the predictions or representations depending on the model configuration
-# print(output)
+# The output will be the predictions or representations depending on the model configuration
+print(output)
