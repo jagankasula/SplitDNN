@@ -2,6 +2,7 @@ import concurrent
 import datetime
 import json
 import numpy as np
+import pickle
 import time
 import torch
 import torch.nn as nn
@@ -58,7 +59,7 @@ class ModelHandler(tornado.web.RequestHandler):
         self.write("Model done")
     async def post(self):
         #data = json.loads(self.request.body)
-            data =  json.loads(self.request.body)
+            data =  pickle.loads(self.request.body)
             json_dump_return_data = model_right(data)
             self.write(json_dump_return_data)
 
@@ -69,13 +70,15 @@ def model_right(data):
 
     #time.sleep(2)    
     x = data['data']
+    print(f'TYPE of X: {type(x)}')
     count = data['count']
     Logger.log(f"processing {count}")
     #print(f"Receiving data from client: {count}")
 
     server_preprocess_time_start = datetime.datetime.now()
-    result_left_np=np.asarray(x)
-    result_left = torch.Tensor(result_left_np)
+    # result_left_np=np.asarray(x)
+    # result_left = torch.Tensor(result_left_np)
+    result_left = torch.Tensor(x)
     server_preprocess_time_end = datetime.datetime.now()
 
     total_server_preprocess_time += (server_preprocess_time_end - server_preprocess_time_start).total_seconds()
@@ -92,7 +95,8 @@ def model_right(data):
     Logger.log(f"Transferring data back to the client: {count}")
 
     encoding_time_start = datetime.datetime.now()
-    json_dump_return_data = json.dumps(return_data, cls=NumpyArrayEncoder)
+    #json_dump_return_data = json.dumps(return_data, cls=NumpyArrayEncoder)
+    json_dump_return_data = pickle.dumps(return_data)
     encoding_time_end = datetime.datetime.now()
 
     total_encoding_time += (encoding_time_end - encoding_time_start).total_seconds()

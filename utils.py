@@ -1,4 +1,5 @@
 import csv
+import cv2
 import datetime
 import json
 import numpy as np
@@ -7,7 +8,9 @@ import ray
 import torch
 import torch.nn as nn
 import torchvision.models as models
+import torchvision.transforms as transforms
 
+from PIL import Image
 from json import JSONEncoder
 from torch.nn.modules.container import Sequential
 
@@ -102,6 +105,24 @@ def create_test_tokens(
         ).to(device)
     return tokens    
 
+def convert_image_to_tensor(img, device):
+
+    img_rgb = Image.fromarray(img).convert('RGB')
+    resize = transforms.Resize([224, 224])
+    img_rgb = resize(img_rgb)
+
+    to_tensor = transforms.ToTensor()
+    tensor = to_tensor(img_rgb)
+    tensor = tensor.unsqueeze(0)
+    tensor = tensor.to(device)
+
+    return tensor
+
+def get_video_input(file_path):
+    # Read the input from the file.
+    cam = cv2.VideoCapture('hdvideo.mp4')
+    return cam
+
 def print_output(flops, macs, params):
     print('{:<30}  {:<8}'.format('Number of flops: ', flops))
     print('{:<30}  {:<8}'.format('Number of MACs: ', macs))
@@ -129,4 +150,14 @@ def write_to_csv(filename, field_names, data):
         writer.writerow(data)
 
 
-    
+# Process video
+def video_process(model):
+    count = 0
+    cam = get_video_input('hdvideo.mp4')
+
+    while count < 10:
+        ret, img = cam.read()
+        tensor = torch.tensor(img, dtype=torch.long)
+        count += 1
+        output = model(tensor.view(-1, tensor.size(-1)))
+        print(output)

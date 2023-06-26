@@ -1,0 +1,9 @@
+{
+    "server": "localhost",
+    "model_file_path": "transformer.pkl",
+    "layers": 12,
+    "split_point": 6,
+    "client_device": "cpu:0",
+    "server_device": "cpu:1",
+    "url": "http://{{server}}:8881/model"
+}

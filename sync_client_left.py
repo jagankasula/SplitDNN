@@ -26,8 +26,7 @@ utils = torch.hub.load('NVIDIA/DeepLearningExamples:torchhub', 'nvidia_convnets_
 device = 'cpu'
 
 # Load a pretrained ResNet-50 model.
-r_50 = models.resnet50(pretrained=True)
-
+r_50 = models.resnet101(pretrained=True)
 # Add r_50 model in to a list of models.
 r_models = [r_50]
 
@@ -68,7 +67,7 @@ class NumpyArrayEncoder(JSONEncoder):
 # Execution 1: This is the function called by the driver code.
 def main_runner():
 
-    for split_point in range(0, 1):
+    for split_point in range(1, 22):
 
         print('SPLIT: ' + str(split_point))
         # Get resnet model after splitting
