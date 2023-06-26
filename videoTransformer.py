@@ -2,6 +2,9 @@ from vit_keras import vit
 from tensorflow import keras
 import tensorflow as tf
 import numpy as np
+import warnings
+
+warnings.filterwarnings('ignore')
 
 input_shape = (224, 224, 3)  # Input image shape
 num_classes = 1000  # Number of output classes
@@ -17,9 +20,11 @@ with tf.device(device):
   
 model.summary()
 
-# physical_devices = tf.config.list_physical_devices()
+physical_devices = tf.config.list_physical_devices()
 
-# print(physical_devices)
+print("----------------------------------------------------------------------------------------")
+print(physical_devices)
+print("----------------------------------------------------------------------------------------")
 
 layers = model.layers
 
