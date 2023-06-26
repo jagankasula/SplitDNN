@@ -17,6 +17,21 @@ with tf.device(device):
   
 model.summary()
 
+physical_devices = tf.config.list_physical_devices()
+
+for layer in model.layers:
+    # Get the device type on which the layer's output is placed
+    output_device = layer.output.device
+
+    # Find the physical device corresponding to the output device
+    device_name = next(
+        (physical_device.name for physical_device in physical_devices if physical_device.name.endswith(output_device)),
+        "Unknown"
+    )
+
+    # Print the layer name and output device
+    print(f"Layer: {layer.name}, Output Device: {device_name}")
+
 # layers = model.layers
 
 # for layer in layers:
