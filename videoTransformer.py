@@ -3,6 +3,9 @@ from tensorflow import keras
 import tensorflow as tf
 import numpy as np
 import warnings
+import platform
+
+
 
 warnings.filterwarnings('ignore')
 
@@ -17,6 +20,8 @@ with tf.device(device):
                         hidden_size=768, num_heads=12, name= 'vit_custom', mlp_dim=3072,
                         activation='softmax', include_top=True,
                         representation_size=None)
+  device_name = platform.node()
+  print("Device name:", device_name)
   
 model.summary()
 
