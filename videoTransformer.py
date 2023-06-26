@@ -1,4 +1,5 @@
 from vit_keras import vit
+from tensorflow import keras
 import numpy as np
 
 input_shape = (224, 224, 3)  # Input image shape
