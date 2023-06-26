@@ -1,54 +1,61 @@
 from vit_keras import vit
 from tensorflow import keras
+import tensorflow as tf
 import numpy as np
 
 input_shape = (224, 224, 3)  # Input image shape
 num_classes = 1000  # Number of output classes
 patch_size = 16  # Patch size for splitting the image
 
-model = vit.build_model(image_size=224, patch_size=16, classes=1000, num_layers=12,
+device = '/gpu:0'  
+
+with tf.device(device):
+  model = vit.build_model(image_size=224, patch_size=16, classes=1000, num_layers=12,
                         hidden_size=768, num_heads=12, name= 'vit_custom', mlp_dim=3072,
                         activation='softmax', include_top=True,
                         representation_size=None)
-layers = model.layers
+  
+model.summary()
 
-for layer in layers:
-  print(layer)
+# layers = model.layers
 
-split_point = 3
-split_layer = model.layers[split_point]
-next_layer = model.layers[split_point + 1]
+# for layer in layers:
+#   print(layer)
 
-print('----------------------- SPLIT LAYER OUTPUT SHAPE -----------------------')
-print(split_layer.output_shape)
+# split_point = 3
+# split_layer = model.layers[split_point]
+# next_layer = model.layers[split_point + 1]
 
-print('----------------------- NEXT LAYER INPUT SHAPE -----------------------')
-print(next_layer.input_shape)
+# print('----------------------- SPLIT LAYER OUTPUT SHAPE -----------------------')
+# print(split_layer.output_shape)
 
-print(split_layer.name)
-print(next_layer.name)
+# print('----------------------- NEXT LAYER INPUT SHAPE -----------------------')
+# print(next_layer.input_shape)
 
-left_model = keras.Model(inputs=model.input, outputs=split_layer.output)
-right_model = keras.Model(inputs=next_layer.input, outputs=model.output)
+# print(split_layer.name)
+# print(next_layer.name)
 
-print('----------------------- LEFT MODEL -----------------------')
-print(left_model)
-print('----------------------- RIGHT MODEL -----------------------')
-print(right_model)
+# left_model = keras.Model(inputs=model.input, outputs=split_layer.output)
+# right_model = keras.Model(inputs=next_layer.input, outputs=model.output)
 
-input_image = np.random.rand(1, 224, 224, 3)  # Shape: (batch_size, image_size, image_size, num_channels)
+# print('----------------------- LEFT MODEL -----------------------')
+# print(left_model)
+# print('----------------------- RIGHT MODEL -----------------------')
+# print(right_model)
 
-# Pass the input image to the model for inference
-left_output = left_model(input_image)
+# input_image = np.random.rand(1, 224, 224, 3)  # Shape: (batch_size, image_size, image_size, num_channels)
 
-right_input = None
+# # Pass the input image to the model for inference
+# left_output = left_model(input_image)
 
-if split_point < 5:
-  right_input = left_output
-else:
-  right_input = left_output[0]
+# right_input = None
 
-output = right_model(right_input)
+# if split_point < 5:
+#   right_input = left_output
+# else:
+#   right_input = left_output[0]
 
-# The output will be the predictions or representations depending on the model configuration
-print(output)
+# output = right_model(right_input)
+
+# # The output will be the predictions or representations depending on the model configuration
+# print(output)
