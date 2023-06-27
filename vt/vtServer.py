@@ -42,12 +42,13 @@ def model_right(data):
     if split_point >= 5:
         left_model_output = left_model_output[0]
 
-    count = data['count']
+    frame_seq_no = data['frame_seq_no']
 
-    print(f'Executing right model for frame #: {count}')
+    print(f'Executing right model for frame #: {frame_seq_no}')
+    
     right_model_output = right_model(left_model_output)
 
-    return_data = {'result':right_model_output, 'count':count}
+    return_data = {'result':right_model_output, 'frame_seq_no':frame_seq_no}
 
     json_dump_return_data = pickle.dumps(return_data)
 

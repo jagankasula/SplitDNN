@@ -44,9 +44,9 @@ def handle_response(response):
     # Process the response here
     load_data = pickle.loads(response.body)
     result = load_data['result']
-    count_return = load_data['count']
-    print(result)
-    print(f'Processed frame # : {count_return}')
+    frame_seq_no = load_data['frame_seq_no']
+    print(result.shape)
+    print(f'Processed frame # : {frame_seq_no}')
       
 
 async def consumer():
@@ -56,7 +56,7 @@ async def consumer():
     async for item in q:
 
         try:            
-            post_data = {'data': item, 'count': frame_count}
+            post_data = {'data': item[0], 'frame_seq_no': item[1]} # item[0] = out_left, item[1] = frame_seq_no
 
             body = pickle.dumps(post_data)
             
@@ -87,13 +87,13 @@ def convert_image_to_tensor(img):
 
 async def main_runner():
 
-    global frame_count
+    frame_seq_no = 1
 
     # Read the input from the file.
     cam = cv2.VideoCapture('hdvideo.mp4')
 
 
-    while frame_count < 10:
+    while frame_seq_no < 10:
 
         # Reading next frame from the input.       
         ret, img_rbg = cam.read()   
@@ -104,10 +104,10 @@ async def main_runner():
             # Send the frame for left processing.
             out_left = producer_video_left(img_rbg)
 
-            await q.put(out_left)
+            await q.put([out_left, frame_seq_no])
 
         # Increment frame count after left processing.    
-        frame_count += 1
+        frame_seq_no += 1
 
 
     cam.release()
