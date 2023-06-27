@@ -3,15 +3,9 @@ from tensorflow import keras
 import tensorflow as tf
 import numpy as np
 import warnings
-import platform
-
 
 
 warnings.filterwarnings('ignore')
-
-input_shape = (224, 224, 3)  # Input image shape
-num_classes = 1000  # Number of output classes
-patch_size = 16  # Patch size for splitting the image
 
 device = '/gpu:0'  
 
@@ -20,8 +14,7 @@ with tf.device(device):
                         hidden_size=768, num_heads=12, name= 'vit_custom', mlp_dim=3072,
                         activation='softmax', include_top=True,
                         representation_size=None)
-  device_name = platform.node()
-  print("Device name:", device_name)
+
   
 model.summary()
 
