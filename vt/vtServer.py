@@ -16,7 +16,7 @@ with tf.device(device):
 
 
 
-split_point = 3
+split_point = 5
 next_layer = model.layers[split_point + 1]
 
 print(next_layer.name)
@@ -37,6 +37,11 @@ class ModelHandler(tornado.web.RequestHandler):
 def model_right(data):
    
     left_model_output = data['data']
+
+    # Transformer layers start from layer 5 and the output of the layer is two tensors. But the next layer input is only first tensor.
+    if split_point >= 5:
+        left_model_output = left_model_output[0]
+
     count = data['count']
 
     print(f'Executing right model for frame #: {count}')

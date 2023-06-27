@@ -27,7 +27,7 @@ with tf.device(device):
 
 
 
-split_point = 3
+split_point = 5
 split_layer = model.layers[split_point]
 next_layer = model.layers[split_point + 1]
 
