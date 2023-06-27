@@ -39,6 +39,7 @@ def model_right(data):
     left_model_output = data['data']
     count = data['count']
 
+    print(f'Executing right model for frame #: {count}')
     right_model_output = right_model(left_model_output)
 
     return_data = {'result':right_model_output, 'count':count}
