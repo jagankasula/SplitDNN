@@ -93,7 +93,7 @@ async def main_runner():
     cam = cv2.VideoCapture('hdvideo.mp4')
 
 
-    while frame_count < 1:
+    while frame_count < 10:
 
         # Reading next frame from the input.       
         ret, img_rbg = cam.read()   
