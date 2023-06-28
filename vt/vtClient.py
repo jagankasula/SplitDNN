@@ -105,7 +105,7 @@ def convert_image_to_tensor(img):
     tensor = tf.image.resize(img_rgb, [224, 224]) 
     tensor  = tf.expand_dims(tensor, axis=0)
 
-    strategy = tf.distribute.experimental.OneDeviceStrategy(device="/gpu:0")
+    strategy = tf.distribute.experimental.CentralStorageStrategy()
     with strategy.scope():
         gpu_tensor = tf.constant(tensor)
 
