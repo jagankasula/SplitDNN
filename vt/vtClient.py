@@ -3,8 +3,10 @@ from tensorflow import keras
 from tornado import httpclient, ioloop
 from tornado.queues import Queue
 from PIL import Image
+from utils import Config, Logger
 
 import cv2
+import datetime
 import pickle
 import tensorflow as tf
 import numpy as np
@@ -12,12 +14,27 @@ import warnings
 
 
 warnings.filterwarnings('ignore')
+warnings.filterwarnings('module')
+warnings.filterwarnings('default')
+warnings.filterwarnings('once')
 
-device = '/cpu:0'
-url = 'http://localhost:8881/model'
+# Read the configurations from the config file.
+config = Config.get_config()
+
+# Assign the configurations to the global variables.
+device = config['client_device']
+split_point = config['split_point']
+url = config['url']
+frames_to_process = config['frames_to_process']
 
 # Initialize queue for storing the output of the frames that were processed on the client (left) side.
 q = Queue(maxsize=2)
+
+# Initialize the start time to None. This value will be set in main_runner when it is initialized.
+start_time = None
+
+# Track total responses handled.
+total_handled_responses = 0
 
 with tf.device(device):
   model = vit.build_model(image_size=224, patch_size=16, classes=1000, num_layers=12,
@@ -27,26 +44,31 @@ with tf.device(device):
 
 
 
-split_point = 5
 split_layer = model.layers[split_point]
-next_layer = model.layers[split_point + 1]
 
 print(split_layer.name)
-print(next_layer.name)
 
 left_model = keras.Model(inputs=model.input, outputs=split_layer.output)
-right_model = keras.Model(inputs=next_layer.input, outputs=model.output)
-
-frame_count = 0
 
 def handle_response(response):
+
+    global total_handled_responses
 
     # Process the response here
     load_data = pickle.loads(response.body)
     result = load_data['result']
     frame_seq_no = load_data['frame_seq_no']
+
+    Logger.log(f'Processed frame # {frame_seq_no}')
     print(result.shape)
-    print(f'Processed frame # : {frame_seq_no}')
+
+    total_handled_responses += 1
+
+    if total_handled_responses == frames_to_process:
+        end_time = datetime.datetime.now()
+        time = (end_time - start_time).total_seconds()
+        Logger.log(f'TOTAL TIME FOR PROCESSING:: {time} sec') 
+        
       
 
 async def consumer():
@@ -89,11 +111,17 @@ async def main_runner():
 
     frame_seq_no = 1
 
+    global start_time
+    global frame_count
+      
+    # This is the start of the video processing. Initialize the start time.
+    start_time = datetime.datetime.now()
+
     # Read the input from the file.
     cam = cv2.VideoCapture('hdvideo.mp4')
 
 
-    while frame_seq_no < 10:
+    while frame_seq_no < frames_to_process + 1:
 
         # Reading next frame from the input.       
         ret, img_rbg = cam.read()   
@@ -109,6 +137,10 @@ async def main_runner():
         # Increment frame count after left processing.    
         frame_seq_no += 1
 
+    # This is the end of the left processing. Set the end time of left video processing.
+    end_time = datetime.datetime.now()
+
+    Logger.log(f'[Inside main_runner] TOTAL TIME TAKEN FOR LEFT PROCESSING {frames_to_process} frames:: {end_time - start_time}')
 
     cam.release()
     cv2.destroyAllWindows()
@@ -116,17 +148,17 @@ async def main_runner():
 
 if __name__=='__main__':
 
-    print('Initialize IOLoop')
+    Logger.log('Initialize IOLoop')
     io_loop = ioloop.IOLoop.current()
 
-    print('Add main_runner and consumer to Tornado event loop as call back')
+    Logger.log('Add main_runner and consumer to Tornado event loop as call back')
     io_loop.add_callback(main_runner)
     io_loop.add_callback(consumer) 
 
-    print('Join the queue')
+    Logger.log('Join the queue')
     q.join()                # Block until all the items in the queue are processed.
 
-    print('Start IOLoop')
+    Logger.log('Start IOLoop')
     io_loop.start()
 
-    print('After start IOLoop')
+    Logger.log('After start IOLoop')

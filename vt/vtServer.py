@@ -4,9 +4,14 @@ import tornado.ioloop
 
 from tensorflow import keras
 from vit_keras import vit
+from utils import Config, Logger
 
 
-device = '/cpu:0'
+# Read the configurations from the config file.
+config = Config.get_config()
+
+split_point = config['split_point']
+device = config['server_device']
 
 with tf.device(device):
   model = vit.build_model(image_size=224, patch_size=16, classes=1000, num_layers=12,
@@ -16,10 +21,9 @@ with tf.device(device):
 
 
 
-split_point = 5
 next_layer = model.layers[split_point + 1]
 
-print(next_layer.name)
+print(f'Starting from layer # {split_point + 1} in server. Layer name: {next_layer.name}')
 
 right_model = keras.Model(inputs=next_layer.input, outputs=model.output)
 
@@ -44,8 +48,8 @@ def model_right(data):
 
     frame_seq_no = data['frame_seq_no']
 
-    print(f'Executing right model for frame #: {frame_seq_no}')
-    
+    Logger.log(f'Executing right model for frame #: {frame_seq_no}')
+
     right_model_output = right_model(left_model_output)
 
     return_data = {'result':right_model_output, 'frame_seq_no':frame_seq_no}
