@@ -3,7 +3,7 @@ from tensorflow import keras
 from tornado import httpclient, ioloop
 from tornado.queues import Queue
 from PIL import Image
-from utils import Config, Logger
+from vtutils import Config, Logger
 
 import cv2
 import datetime
