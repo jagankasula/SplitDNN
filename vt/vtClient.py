@@ -14,9 +14,6 @@ import warnings
 
 
 warnings.filterwarnings('ignore')
-warnings.filterwarnings('module')
-warnings.filterwarnings('default')
-warnings.filterwarnings('once')
 
 # Read the configurations from the config file.
 config = Config.get_config()
@@ -36,8 +33,8 @@ start_time = None
 # Track total responses handled.
 total_handled_responses = 0
 
-
-model = vit.build_model(image_size=224, patch_size=16, classes=1000, num_layers=12,
+with tf.device(device):
+  model = vit.build_model(image_size=224, patch_size=16, classes=1000, num_layers=12,
                         hidden_size=768, num_heads=12, name= 'vit_custom', mlp_dim=3072,
                         activation='softmax', include_top=True,
                         representation_size=None)
