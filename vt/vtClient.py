@@ -39,6 +39,9 @@ with tf.device(device):
                         activation='softmax', include_top=True,
                         representation_size=None)
   
+  print('*****************************')
+  print(tf.config.list_physical_devices)
+  
   split_layer = model.layers[split_point]
 
   print(split_layer.name)
@@ -72,7 +75,9 @@ async def consumer():
     
     async for item in q:
 
-        try:            
+        try:   
+            Logger.log(f'[Inside consumer] Frame # {item[1]}: Preparing body to send request to server.')
+
             post_data = {'data': item[0], 'frame_seq_no': item[1]} # item[0] = out_left, item[1] = frame_seq_no
 
             body = pickle.dumps(post_data)
@@ -127,6 +132,8 @@ async def main_runner():
 
         # If the frame exists
         if ret: 
+            
+            Logger.log(f'[Inside main_runner] Frame # {frame_seq_no}: Send for left processing.')
 
             # Send the frame for left processing.
             out_left = producer_video_left(img_rbg)
