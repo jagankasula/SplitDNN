@@ -47,6 +47,8 @@ with tf.device(device):
   print(split_layer.name)
   
   left_model = keras.Model(inputs=model.input, outputs=split_layer.output)
+  print('*****************************')
+  print(left_model.input_shape)
 
 def handle_response(response):
 
