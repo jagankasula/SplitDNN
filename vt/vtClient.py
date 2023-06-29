@@ -95,6 +95,10 @@ def producer_video_left(img):
 
     tensor = convert_image_to_tensor(img)
 
+    print('***************************')
+
+    print(tensor.shape)
+
     out_left = left_model(tensor)
     
     return out_left
@@ -152,26 +156,9 @@ async def main_runner():
     cv2.destroyAllWindows()
 
 
-# with tf.device(device):
+with tf.device(device):
 
-#     if __name__=='__main__':
-
-#         Logger.log('Initialize IOLoop')
-#         io_loop = ioloop.IOLoop.current()
-
-#         Logger.log('Add main_runner and consumer to Tornado event loop as call back')
-#         io_loop.add_callback(main_runner)
-#         io_loop.add_callback(consumer) 
-
-#         Logger.log('Join the queue')
-#         q.join()                # Block until all the items in the queue are processed.
-
-#         Logger.log('Start IOLoop')
-#         io_loop.start()
-
-#         Logger.log('After start IOLoop')
-
-if __name__=='__main__':
+    if __name__=='__main__':
 
         Logger.log('Initialize IOLoop')
         io_loop = ioloop.IOLoop.current()
