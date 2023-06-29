@@ -38,14 +38,12 @@ with tf.device(device):
                         hidden_size=768, num_heads=12, name= 'vit_custom', mlp_dim=3072,
                         activation='softmax', include_top=True,
                         representation_size=None)
+  
+  split_layer = model.layers[split_point]
 
-
-
-split_layer = model.layers[split_point]
-
-print(split_layer.name)
-
-left_model = keras.Model(inputs=model.input, outputs=split_layer.output)
+  print(split_layer.name)
+  
+  left_model = keras.Model(inputs=model.input, outputs=split_layer.output)
 
 def handle_response(response):
 
@@ -147,19 +145,21 @@ async def main_runner():
     cv2.destroyAllWindows()
 
 
-if __name__=='__main__':
+with tf.device(device):
 
-    Logger.log('Initialize IOLoop')
-    io_loop = ioloop.IOLoop.current()
+    if __name__=='__main__':
 
-    Logger.log('Add main_runner and consumer to Tornado event loop as call back')
-    io_loop.add_callback(main_runner)
-    io_loop.add_callback(consumer) 
+        Logger.log('Initialize IOLoop')
+        io_loop = ioloop.IOLoop.current()
 
-    Logger.log('Join the queue')
-    q.join()                # Block until all the items in the queue are processed.
+        Logger.log('Add main_runner and consumer to Tornado event loop as call back')
+        io_loop.add_callback(main_runner)
+        io_loop.add_callback(consumer) 
 
-    Logger.log('Start IOLoop')
-    io_loop.start()
+        Logger.log('Join the queue')
+        q.join()                # Block until all the items in the queue are processed.
 
-    Logger.log('After start IOLoop')
+        Logger.log('Start IOLoop')
+        io_loop.start()
+
+        Logger.log('After start IOLoop')
