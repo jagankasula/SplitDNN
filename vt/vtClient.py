@@ -47,7 +47,7 @@ with tf.device(device):
   print(split_layer.name)
   
   left_model = keras.Model(inputs=model.input, outputs=split_layer.output)
-  print('*****************************')
+  print('***************************** LEFT MODEL INPUT SHAPE')
   print(left_model.input_shape)
 
 def handle_response(response):
@@ -97,7 +97,7 @@ def producer_video_left(img):
 
     tensor = convert_image_to_tensor(img)
 
-    print('***************************')
+    print('*************************** INPUT TENSOR SHAPE')
 
     print(tensor.shape)
 
