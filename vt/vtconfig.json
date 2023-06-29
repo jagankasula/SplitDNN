@@ -1,7 +1,7 @@
 {
     "server": "localhost",
     "split_point": 6,
-    "client_device": "/CPU:0",
+    "client_device": "/device:GPU:0",
     "server_device": "/device:GPU:1",
     "frames_to_process": 50,
     "url": "http://{{server}}:8881/model"
