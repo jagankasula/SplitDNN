@@ -13,19 +13,19 @@ config = Config.get_config()
 split_point = config['split_point']
 device = config['server_device']
 
-
-model = vit.build_model(image_size=224, patch_size=16, classes=1000, num_layers=12,
+with tf.device(device):
+    model = vit.build_model(image_size=224, patch_size=16, classes=1000, num_layers=12,
                         hidden_size=768, num_heads=12, name= 'vit_custom', mlp_dim=3072,
                         activation='softmax', include_top=True,
                         representation_size=None)
 
 
 
-next_layer = model.layers[split_point + 1]
+    next_layer = model.layers[split_point + 1]
 
-print(f'Starting from layer # {split_point + 1} in server. Layer name: {next_layer.name}')
+    print(f'Starting from layer # {split_point + 1} in server. Layer name: {next_layer.name}')
 
-right_model = keras.Model(inputs=next_layer.input, outputs=model.output)
+    right_model = keras.Model(inputs=next_layer.input, outputs=model.output)
 
 
 class ModelHandler(tornado.web.RequestHandler):
@@ -40,23 +40,25 @@ class ModelHandler(tornado.web.RequestHandler):
 
 def model_right(data):
    
-    left_model_output = data['data']
+   with tf.device(device):
+       
+       left_model_output = data['data']
 
-    # Transformer layers start from layer 5 and the output of the layer is two tensors. But the next layer input is only first tensor.
-    if split_point >= 5:
-        left_model_output = left_model_output[0]
+        # Transformer layers start from layer 5 and the output of the layer is two tensors. But the next layer input is only first tensor.            
+       if split_point >= 5:
+            left_model_output = left_model_output[0]
 
-    frame_seq_no = data['frame_seq_no']
+       frame_seq_no = data['frame_seq_no']
 
-    Logger.log(f'Executing right model for frame #: {frame_seq_no}')
+       Logger.log(f'Executing right model for frame #: {frame_seq_no}')
 
-    right_model_output = right_model(left_model_output)
+       right_model_output = right_model(left_model_output)
 
-    return_data = {'result':right_model_output, 'frame_seq_no':frame_seq_no}
+       return_data = {'result':right_model_output, 'frame_seq_no':frame_seq_no}
 
-    json_dump_return_data = pickle.dumps(return_data)
+       json_dump_return_data = pickle.dumps(return_data)
 
-    return json_dump_return_data       
+       return json_dump_return_data       
      
 
 def make_app():
