@@ -4,7 +4,7 @@ import datetime
 class Config:
     @staticmethod
     def get_config():
-        with open('config.json') as config_file:
+        with open('vtconfig.json') as config_file:
             config = json.load(config_file)
             config['url'] = config['url'].replace("{{server}}", config['server'])
         return config
