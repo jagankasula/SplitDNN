@@ -3,7 +3,8 @@ from tensorflow import keras
 from tornado import httpclient, ioloop
 from tornado.queues import Queue
 from PIL import Image
-from vtutils import Config, Logger
+from vtutils import Config, Logger, write_to_csv
+from flops_profiler.profiler import get_model_profile
 
 import cv2
 import datetime
@@ -17,6 +18,9 @@ warnings.filterwarnings('ignore')
 
 # Read the configurations from the config file.
 config = Config.get_config()
+
+metrics_headers = ['split no.', 'flops', 'macs', 'params', 'total_processing_time', 'single_frame_time']
+
 
 # Assign the configurations to the global variables.
 device = config['client_device']
@@ -34,7 +38,7 @@ start_time = None
 total_handled_responses = 0
 
 with tf.device(device):
-  model = vit.build_model(image_size=224, patch_size=16, classes=1000, num_layers=12,
+  model = vit.build_model(image_size=224, patch_size=16, classes=1000, num_layers=19,
                         hidden_size=768, num_heads=12, name= 'vit_custom', mlp_dim=3072,
                         activation='softmax', include_top=True,
                         representation_size=None)
@@ -53,6 +57,14 @@ with tf.device(device):
   print('***************************** LEFT MODEL INPUT SHAPE')
   print(left_model.input_shape)
 
+  flops, macs, params = get_model_profile(
+    left_model,
+    input_shape= tuple([1, 224, 224, 3]),
+    print_profile=True,
+    detailed=True,
+    as_string=True,
+)
+
 def handle_response(response):
 
     global total_handled_responses
@@ -70,10 +82,12 @@ def handle_response(response):
     if total_handled_responses == frames_to_process:
         end_time = datetime.datetime.now()
         time = (end_time - start_time).total_seconds()
-        Logger.log(f'TOTAL TIME FOR PROCESSING:: {time} sec') 
+        single_frame_time = time/frames_to_process
+        write_to_csv('vt.csv', metrics_headers, [split_point, flops, macs, params, time, single_frame_time])
+        Logger.log(f'TOTAL TIME FOR PROCESSING:: {time} sec')
+        Logger.log(f'TIME TAKEN FOR SINGLE FRAME:: {single_frame_time} sec')
         
       
-
 async def consumer():
 
     http_client = httpclient.AsyncHTTPClient(defaults=dict(connect_timeout = 10000000.0 ,request_timeout=100000000000.0))
