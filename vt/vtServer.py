@@ -4,7 +4,7 @@ import tornado.ioloop
 
 from tensorflow import keras
 from vit_keras import vit
-from utils import Config, Logger
+from vtutils import Config, Logger
 
 
 # Read the configurations from the config file.
