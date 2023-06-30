@@ -4,22 +4,24 @@ from tornado import httpclient, ioloop
 from tornado.queues import Queue
 from PIL import Image
 from vtutils import Config, Logger, write_to_csv
-from flops_profiler.profiler import get_model_profile
+from model_profiler import model_profiler
 
 import cv2
 import datetime
 import pickle
 import tensorflow as tf
 import numpy as np
+import pandas as pd
 import warnings
+import io
 
-
+io.StringIO
 warnings.filterwarnings('ignore')
 
 # Read the configurations from the config file.
 config = Config.get_config()
 
-metrics_headers = ['split no.', 'flops', 'macs', 'params', 'total_processing_time', 'single_frame_time']
+metrics_headers = ['split no.', 'flops', 'total_processing_time', 'single_frame_time']
 
 
 # Assign the configurations to the global variables.
@@ -45,25 +47,21 @@ with tf.device(device):
   
   print('*****************************')
   print(tf.config.list_physical_devices('GPU'))
-
-  print('***************************** MODEL INPUT SHAPE')
-  print(model.input_shape)
   
   split_layer = model.layers[split_point]
 
   print(split_layer.name)
   
   left_model = keras.Model(inputs=model.input, outputs=split_layer.output)
-  print('***************************** LEFT MODEL INPUT SHAPE')
-  print(left_model.input_shape)
 
-  flops, macs, params = get_model_profile(
-    left_model,
-    input_shape= tuple([1, 224, 224, 3]),
-    print_profile=True,
-    detailed=True,
-    as_string=True,
-)
+  profile = model_profiler(left_model, frames_to_process)
+
+  df = pd.read_csv(io.StringIO(profile), sep='|', skiprows=0, skipinitialspace=True)
+
+  df.columns = df.columns.str.strip()
+
+  flops = df["Value"].values[2]
+
 
 def handle_response(response):
 
@@ -83,7 +81,7 @@ def handle_response(response):
         end_time = datetime.datetime.now()
         time = (end_time - start_time).total_seconds()
         single_frame_time = time/frames_to_process
-        write_to_csv('vt.csv', metrics_headers, [split_point, flops, macs, params, time, single_frame_time])
+        write_to_csv('vt.csv', metrics_headers, [split_point, flops, time, single_frame_time])
         Logger.log(f'TOTAL TIME FOR PROCESSING:: {time} sec')
         Logger.log(f'TIME TAKEN FOR SINGLE FRAME:: {single_frame_time} sec')
         
@@ -113,10 +111,6 @@ async def consumer():
 def producer_video_left(img):
 
     tensor = convert_image_to_tensor(img)
-
-    print('*************************** INPUT TENSOR SHAPE')
-
-    print(tensor.shape)
 
     out_left = left_model(tensor)
     
