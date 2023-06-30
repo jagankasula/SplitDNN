@@ -56,13 +56,13 @@ with tf.device(device):
   
   left_model = keras.Model(inputs=model.input, outputs=split_layer.output)
 
-  profile = model_profiler(left_model, frames_to_process)
+#   profile = model_profiler(left_model, frames_to_process)
 
-  df = pd.read_csv(io.StringIO(profile), sep='|', skiprows=0, skipinitialspace=True)
+#   df = pd.read_csv(io.StringIO(profile), sep='|', skiprows=0, skipinitialspace=True)
 
-  df.columns = df.columns.str.strip()
+#   df.columns = df.columns.str.strip()
 
-  flops = df["Value"].values[2]
+  flops = 0
 
 
 def handle_response(response):
