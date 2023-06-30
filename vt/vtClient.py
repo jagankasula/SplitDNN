@@ -21,7 +21,7 @@ warnings.filterwarnings('ignore')
 # Read the configurations from the config file.
 config = Config.get_config()
 
-metrics_headers = ['split no.', 'flops', 'total_processing_time', 'single_frame_time']
+metrics_headers = ['split no.', 'flops', 'total_processing_time', 'single_frame_time', 'left_output_size']
 
 
 # Assign the configurations to the global variables.
@@ -38,6 +38,8 @@ start_time = None
 
 # Track total responses handled.
 total_handled_responses = 0
+
+left_output_size = 0
 
 with tf.device(device):
   model = vit.build_model(image_size=224, patch_size=16, classes=1000, num_layers=19,
@@ -81,7 +83,7 @@ def handle_response(response):
         end_time = datetime.datetime.now()
         time = (end_time - start_time).total_seconds()
         single_frame_time = time/frames_to_process
-        write_to_csv('vt.csv', metrics_headers, [split_point, flops, time, single_frame_time])
+        write_to_csv('vt.csv', metrics_headers, [split_point, flops, time, single_frame_time, left_output_size])
         Logger.log(f'TOTAL TIME FOR PROCESSING:: {time} sec')
         Logger.log(f'TIME TAKEN FOR SINGLE FRAME:: {single_frame_time} sec')
         
@@ -134,6 +136,7 @@ async def main_runner():
 
     global start_time
     global frame_count
+    global left_output_size
       
     # This is the start of the video processing. Initialize the start time.
     start_time = datetime.datetime.now()
@@ -162,6 +165,8 @@ async def main_runner():
 
     # This is the end of the left processing. Set the end time of left video processing.
     end_time = datetime.datetime.now()
+
+    left_output_size = out_left.size()
 
     Logger.log(f'[Inside main_runner] TOTAL TIME TAKEN FOR LEFT PROCESSING {frames_to_process} frames:: {end_time - start_time}')
 
