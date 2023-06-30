@@ -166,7 +166,7 @@ async def main_runner():
     # This is the end of the left processing. Set the end time of left video processing.
     end_time = datetime.datetime.now()
 
-    left_output_size = out_left.size()
+    left_output_size = tf.size(out_left)
 
     Logger.log(f'[Inside main_runner] TOTAL TIME TAKEN FOR LEFT PROCESSING {frames_to_process} frames:: {end_time - start_time}')
 
