@@ -55,6 +55,8 @@ input_image = np.random.rand(1, 224, 224, 3)  # Shape: (batch_size, image_size, 
 # Pass the input image to the model for inference
 left_output = left_model(input_image)
 
+print(tf.size(left_output).numpy())
+
 right_input = None
 
 if split_point < 5:
