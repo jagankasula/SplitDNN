@@ -178,7 +178,7 @@ def main_runner():
         time = (end_time - start_time).total_seconds()
         single_frame_time = time/frames_to_process
 
-        write_to_csv('vt.csv', metrics_headers, [split_point, flops, time, single_frame_time, left_output_size])
+        write_to_csv('vtSync.csv', metrics_headers, [split_point, flops, time, single_frame_time, left_output_size])
         Logger.log(f'TOTAL TIME FOR PROCESSING:: {time} sec')
         Logger.log(f'TIME TAKEN FOR SINGLE FRAME:: {single_frame_time} sec')
 
