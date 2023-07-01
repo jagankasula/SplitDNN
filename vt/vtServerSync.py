@@ -27,7 +27,7 @@ with tf.device(device):
 class ModelHandler(tornado.web.RequestHandler):
     def get(self):
         self.write("Model done")
-    async def post(self):
+    def post(self):
         #data = json.loads(self.request.body)
             data =  pickle.loads(self.request.body)
             json_dump_return_data = model_right(data)
@@ -37,7 +37,7 @@ class ModelHandler(tornado.web.RequestHandler):
 class SplitPointHandler(tornado.web.RequestHandler):
     def get(self):
         self.write("Model done")
-    async def post(self):
+    def post(self):
         #data = json.loads(self.request.body)
             data =  pickle.loads(self.request.body)
             json_dump_return_data = set_model_right(data)
@@ -84,7 +84,7 @@ def model_right(data):
 
 def make_app():
     return tornado.web.Application([
-        (r"/model", ModelHandler)
+        (r"/model", ModelHandler),
         (r"/split_point", SplitPointHandler)
     ])
 
