@@ -11,7 +11,7 @@ import datetime
 
 warnings.filterwarnings('ignore')
 
-device = '/gpu:1'  
+device = '/gpu:2'  
 frames_to_process = 50
 
 def convert_image_to_tensor(img):
