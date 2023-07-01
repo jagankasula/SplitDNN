@@ -166,6 +166,7 @@ def main_runner():
         global start_time
         global frame_count
         global left_output_size
+        global total_communication_time
         
         # This is the start of the video processing. Initialize the start time.
         start_time = datetime.datetime.now()
@@ -213,6 +214,8 @@ def main_runner():
         Logger.log(f'TOTAL TIME FOR PROCESSING {frames_to_process} frames:: {time} sec')
         Logger.log(f'TIME TAKEN TO PROCESS SINGLE FRAME:: {single_frame_time} sec')
         print('-------------------------------------------------------------------------------------------')
+
+        total_communication_time = 0
 
         cam.release()
         cv2.destroyAllWindows()
