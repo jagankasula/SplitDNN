@@ -34,7 +34,7 @@ class ModelHandler(tornado.web.RequestHandler):
             data =  pickle.loads(self.request.body)
             return_data = model_right(data)
             server_processing_timestamp = datetime.datetime.now()
-            return_data['server_processing_time'] = server_processing_timestamp - server_request_receive_timestamp
+            return_data['server_processing_time'] = (server_processing_timestamp - server_request_receive_timestamp).total_seconds()
             json_dump_return_data = pickle.dumps(return_data)
             self.write(json_dump_return_data)
 

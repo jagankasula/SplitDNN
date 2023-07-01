@@ -18,7 +18,7 @@ warnings.filterwarnings('ignore')
 # Read the configurations from the config file.
 config = Config.get_config()
 
-metrics_headers = ['split no.', 'flops', 'total_processing_time', 'single_frame_time', 'left_output_size', 'total_communication_time']
+metrics_headers = ['split no.', 'flops', 'total_processing_time', 'single_frame_time', 'left_output_size', 'total_communication_time', 'single_frame_communication_time']
 
 
 # Assign the configurations to the global variables.
@@ -35,7 +35,7 @@ start_time = None
 
 client_request_time = None
 server_response_time= None
-total_communication_time = datetime.timedelta()
+total_communication_time = 0
 
 # Track total responses handled.
 total_handled_responses = 0
@@ -139,7 +139,7 @@ def set_total_communication_time(server_processing_time):
 
     global total_communication_time
 
-    communication_time = (server_response_time - client_request_time) + server_processing_time
+    communication_time = (server_response_time - client_request_time).total_seconds() + server_processing_time
 
     total_communication_time += communication_time
 
@@ -204,10 +204,12 @@ def main_runner():
         time = (end_time - start_time).total_seconds()
         single_frame_time = time/frames_to_process
 
-        write_to_csv('vtSync1.csv', metrics_headers, [split_point, flops, time, single_frame_time, left_output_size, total_communication_time])
+        single_frame_communication_time = total_communication_time/frames_to_process
+
+        write_to_csv('vtSync1.csv', metrics_headers, [split_point, flops, time, single_frame_time, left_output_size, total_communication_time, single_frame_communication_time])
         print('-------------------------------------------------------------------------------------------')
         Logger.log(f'TOTAL COMMUNICATION TIME FOR {frames_to_process} frames:: {total_communication_time}')
-        Logger.log(f'COMMUNICATION TIME FOT SINGLE FRAME:: {total_communication_time/frames_to_process}')
+        Logger.log(f'COMMUNICATION TIME FOT SINGLE FRAME:: {single_frame_communication_time}')
         Logger.log(f'TOTAL TIME FOR PROCESSING {frames_to_process} frames:: {time} sec')
         Logger.log(f'TIME TAKEN TO PROCESS SINGLE FRAME:: {single_frame_time} sec')
         print('-------------------------------------------------------------------------------------------')
