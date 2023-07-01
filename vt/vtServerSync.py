@@ -1,4 +1,5 @@
 import pickle
+import datetime
 import tensorflow as tf
 import tornado.ioloop
 
@@ -29,8 +30,12 @@ class ModelHandler(tornado.web.RequestHandler):
         self.write("Model done")
     def post(self):
         #data = json.loads(self.request.body)
+            server_request_receive_timestamp = datetime.datetime.now()
             data =  pickle.loads(self.request.body)
-            json_dump_return_data = model_right(data)
+            return_data = model_right(data)
+            server_processing_timestamp = datetime.datetime.now()
+            return_data['server_processing_time'] = server_processing_timestamp - server_request_receive_timestamp
+            json_dump_return_data = pickle.dumps(return_data)
             self.write(json_dump_return_data)
 
 
@@ -75,11 +80,9 @@ def model_right(data):
 
        right_model_output = right_model(left_model_output)
 
-       return_data = {'result':right_model_output, 'frame_seq_no':frame_seq_no}
+       return_data = {'result':right_model_output, 'frame_seq_no':frame_seq_no}       
 
-       json_dump_return_data = pickle.dumps(return_data)
-
-       return json_dump_return_data       
+       return return_data       
      
 
 def make_app():
@@ -92,5 +95,5 @@ with tf.device(device):
      if __name__ == "__main__":
         app = make_app()
         app.listen(8881)
-        print("Got a Call")
+        print("Server started")
         tornado.ioloop.IOLoop.current().start()

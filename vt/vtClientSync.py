@@ -18,7 +18,7 @@ warnings.filterwarnings('ignore')
 # Read the configurations from the config file.
 config = Config.get_config()
 
-metrics_headers = ['split no.', 'flops', 'total_processing_time', 'single_frame_time', 'left_output_size']
+metrics_headers = ['split no.', 'flops', 'total_processing_time', 'single_frame_time', 'left_output_size', 'total_communication_time']
 
 
 # Assign the configurations to the global variables.
@@ -32,6 +32,10 @@ q = Queue(maxsize=2)
 
 # Initialize the start time to None. This value will be set in main_runner when it is initialized.
 start_time = None
+
+client_request_time = None
+server_response_time= None
+total_communication_time = 0
 
 # Track total responses handled.
 total_handled_responses = 0
@@ -101,23 +105,45 @@ def get_request_body(left_output, frame_seq_no, split_point):
 # Send HTTP request to server.
 def send_request(request_body, endpoint):
 
+    global client_request_time
+    global server_response_time
+
+    client_request_time = datetime.datetime.now()
+
     http_client = httpclient.HTTPClient(defaults=dict(connect_timeout = 10000000.0 ,request_timeout=100000000000.0))
 
-    body = pickle.dumps(request_body)
+    body = pickle.dumps(request_body)    
 
     response =  http_client.fetch(url + endpoint,  method = 'POST', headers = None, body = body)
 
+    server_response_time = datetime.datetime.now()
+
     return response
 
-def handle_response(response):
+def handle_response(response):    
         
     # Process the response here
-        response_data = pickle.loads(response.body)
-        result = response_data['result']
-        frame_seq_no = response_data['frame_seq_no']
+    response_data = pickle.loads(response.body)
 
-        Logger.log(f'Processed frame # {frame_seq_no}')
-        print(result.shape)
+    result = response_data['result']
+    frame_seq_no = response_data['frame_seq_no']
+    server_processing_time = response_data['server_processing_time']
+
+    set_total_communication_time(server_processing_time)    
+
+    Logger.log(f'Processed frame # {frame_seq_no}')
+    print(result.shape)
+
+
+def set_total_communication_time(server_processing_time):
+
+    global total_communication_time
+
+    communication_time = (server_response_time - client_request_time) + server_processing_time
+
+    total_communication_time += communication_time
+
+
 
 def main_runner():
 
@@ -178,9 +204,13 @@ def main_runner():
         time = (end_time - start_time).total_seconds()
         single_frame_time = time/frames_to_process
 
-        write_to_csv('vtSync.csv', metrics_headers, [split_point, flops, time, single_frame_time, left_output_size])
-        Logger.log(f'TOTAL TIME FOR PROCESSING:: {time} sec')
-        Logger.log(f'TIME TAKEN FOR SINGLE FRAME:: {single_frame_time} sec')
+        write_to_csv('vtSync.csv', metrics_headers, [split_point, flops, time, single_frame_time, left_output_size, total_communication_time])
+        print('-------------------------------------------------------------------------------------------')
+        Logger.log(f'TOTAL COMMUNICATION TIME FOR {frames_to_process} frames:: {total_communication_time}')
+        Logger.log(f'COMMUNICATION TIME FOT SINGLE FRAME:: {total_communication_time/frames_to_process}')
+        Logger.log(f'TOTAL TIME FOR PROCESSING {frames_to_process} frames:: {time} sec')
+        Logger.log(f'TIME TAKEN TO PROCESS SINGLE FRAME:: {single_frame_time} sec')
+        print('-------------------------------------------------------------------------------------------')
 
         cam.release()
         cv2.destroyAllWindows()
