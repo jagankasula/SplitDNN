@@ -139,7 +139,7 @@ def set_total_communication_time(server_processing_time):
 
     global total_communication_time
 
-    communication_time = (server_response_time - client_request_time).total_seconds() + server_processing_time
+    communication_time = (server_response_time - client_request_time).total_seconds() - server_processing_time
 
     total_communication_time += communication_time
 
