@@ -35,7 +35,7 @@ start_time = None
 
 client_request_time = None
 server_response_time= None
-total_communication_time = 0
+total_communication_time = datetime.timedelta()
 
 # Track total responses handled.
 total_handled_responses = 0
@@ -204,7 +204,7 @@ def main_runner():
         time = (end_time - start_time).total_seconds()
         single_frame_time = time/frames_to_process
 
-        write_to_csv('vtSync.csv', metrics_headers, [split_point, flops, time, single_frame_time, left_output_size, total_communication_time])
+        write_to_csv('vtSync1.csv', metrics_headers, [split_point, flops, time, single_frame_time, left_output_size, total_communication_time])
         print('-------------------------------------------------------------------------------------------')
         Logger.log(f'TOTAL COMMUNICATION TIME FOR {frames_to_process} frames:: {total_communication_time}')
         Logger.log(f'COMMUNICATION TIME FOT SINGLE FRAME:: {total_communication_time/frames_to_process}')
