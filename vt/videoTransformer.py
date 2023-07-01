@@ -87,6 +87,8 @@ with tf.device(device):
       Logger.log(f'Processed frame # {frame_seq_no}')
       print(output.shape)
 
+      frame_seq_no += 1
+
   end_time = datetime.datetime.now()
 
   time = (end_time - start_time).total_seconds()
