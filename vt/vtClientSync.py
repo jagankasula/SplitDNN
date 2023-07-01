@@ -24,7 +24,7 @@ metrics_headers = ['split no.', 'flops', 'total_processing_time', 'single_frame_
 # Assign the configurations to the global variables.
 device = config['client_device']
 split_point = config['split_point']
-url = config['url']
+url = "http://localhost:8881/"
 frames_to_process = config['frames_to_process']
 
 # Initialize queue for storing the output of the frames that were processed on the client (left) side.
