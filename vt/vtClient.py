@@ -198,6 +198,7 @@ async def main_runner():
         global start_time
         global frame_count
         global left_output_size
+        global total_handled_responses
         
         # This is the start of the video processing. Initialize the start time.
         start_time = datetime.datetime.now()
@@ -236,6 +237,7 @@ async def main_runner():
 
         # Wait until all the responses for this split point are received and processed.
         await loop_event.wait()
+        total_handled_responses = 0
         loop_event.clear()
 
 
