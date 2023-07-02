@@ -51,7 +51,7 @@ with tf.device(device):
                         representation_size=None)
   
   print('*****************************')
-  print(tf.config.list_physical_devices('GPU'))
+  print(tf.config.list_physical_devices(device_type=None))
   
   split_layer = model.layers[split_point]
 
