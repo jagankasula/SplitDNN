@@ -104,7 +104,7 @@ async def consumer():
             body = pickle.dumps(post_data)
             
             # Sending HTTP request to server.
-            response =  http_client.fetch(url,  method = 'POST', headers = None, body = body)
+            response =  http_client.fetch(url + 'model',  method = 'POST', headers = None, body = body)
 
             response.add_done_callback(lambda f: handle_response(f.result()))            
 
@@ -233,7 +233,7 @@ async def main_runner():
     
         cam.release()
         cv2.destroyAllWindows()
-        
+
         # Wait until all the responses for this split point are received and processed.
         await loop_event.wait()
         loop_event.clear()
