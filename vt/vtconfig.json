@@ -4,5 +4,5 @@
     "client_device": "/CPU:0",
     "server_device": "/GPU:1",
     "frames_to_process": 50,
-    "url": "http://{{server}}:8881/model"
+    "url": "http://{{server}}:8881/"
 }
