@@ -105,6 +105,8 @@ def handle_response(response):
 
         # Calculate average inference gap between two consequtive frames
         avg_consec_inference_gap = total_inference_gap/(frames_to_process - 1)
+        # Reset to zero for next loop.
+        total_inference_gap = 0
         write_to_csv('vt.csv', metrics_headers, [split_point, flops, time, single_frame_time, left_output_size, avg_consec_inference_gap])
         Logger.log(f'CONSECUTIVE INFERENCE GAP BETWEEN TWO FRAMES:: {avg_consec_inference_gap}')
         Logger.log(f'TOTAL TIME FOR PROCESSING:: {time} sec')
