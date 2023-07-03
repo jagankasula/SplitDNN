@@ -239,6 +239,7 @@ async def main_runner():
 
         # Wait until all the responses for this split point are received and processed.
         await loop_event.wait()
+        split_point += 1
         total_handled_responses = 0
         loop_event.clear()
 
