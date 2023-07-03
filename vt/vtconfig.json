@@ -1,5 +1,5 @@
 {
-    "server": "KC-SCER-FCCT0M3",
+    "server": "134.193.129.157",
     "split_point": 1,
     "client_device": "/CPU:0",
     "server_device": "/GPU:1",
