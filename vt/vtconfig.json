@@ -1,5 +1,5 @@
 {
-    "server": "localhost",
+    "server": "KC-SCER-FCCT0M3",
     "split_point": 1,
     "client_device": "/CPU:0",
     "server_device": "/GPU:1",
