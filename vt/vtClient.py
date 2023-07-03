@@ -29,7 +29,8 @@ metrics_headers = ['split no.', 'flops', 'total_processing_time', 'single_frame_
 
 # Assign the configurations to the global variables.
 device = config['client_device']
-split_point = config['split_point']
+#split_point = config['split_point']
+split_point = 1
 url = config['url']
 frames_to_process = config['frames_to_process']
 
@@ -179,6 +180,8 @@ async def send_request(request_body, endpoint):
     return response
 
 async def main_runner():
+
+    global split_point
 
     for split_point in range(1, 22):
 
