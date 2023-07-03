@@ -6,6 +6,8 @@ from vit_keras import vit
 
 device = '/cpu:0'
 
+print(tf.config.list_physical_devices(device_type=None))
+
 with tf.device(device):
   model = vit.build_model(image_size=224, patch_size=16, classes=1000, num_layers=12,
                         hidden_size=768, num_heads=12, name= 'vit_custom', mlp_dim=3072,
