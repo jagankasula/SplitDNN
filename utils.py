@@ -118,7 +118,7 @@ def convert_image_to_tensor(img, device):
 
     return tensor
 
-def get_video_input(file_path):
+def get_video_input():
     # Read the input from the file.
     cam = cv2.VideoCapture('hdvideo.mp4')
     return cam

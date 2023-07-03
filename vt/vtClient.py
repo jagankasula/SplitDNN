@@ -24,7 +24,7 @@ loop_event = tornado.locks.Event()
 # Read the configurations from the config file.
 config = Config.get_config()
 
-metrics_headers = ['split no.', 'flops', 'total_processing_time', 'single_frame_time', 'left_output_size']
+metrics_headers = ['split no.', 'flops', 'total_processing_time', 'single_frame_time', 'left_output_size', 'avg_consec_inference_gap']
 
 
 # Assign the configurations to the global variables.
@@ -42,6 +42,9 @@ start_time = None
 
 # Track total responses handled.
 total_handled_responses = 0
+
+# Total inference gap. Sum of the time gap between two consecutive inferences.
+total_inference_gap = 0
 
 left_output_size = 0
 
@@ -70,6 +73,9 @@ with tf.device(device):
 def handle_response(response):
 
     global total_handled_responses
+    global total_inference_gap
+
+    prev_frame_end_time = None
 
     # Process the response here
     load_data = pickle.loads(response.body)
@@ -81,11 +87,25 @@ def handle_response(response):
 
     total_handled_responses += 1
 
+    # First frame that is processed. Record its end time. 
+    if total_handled_responses == 1:
+        prev_frame_end_time = datetime.datetime.now()
+    else:
+        curr_frame_end_time = datetime.datetime.now()
+        total_inference_gap += (curr_frame_end_time - prev_frame_end_time).total_seconds()
+        prev_frame_end_time = curr_frame_end_time
+
     if total_handled_responses == frames_to_process:
+
+        # Calculate total time taken to process all 50 frames.
         end_time = datetime.datetime.now()
         time = (end_time - start_time).total_seconds()
         single_frame_time = time/frames_to_process
-        write_to_csv('vt.csv', metrics_headers, [split_point, flops, time, single_frame_time, left_output_size])
+
+        # Calculate average inference gap between two consequtive frames
+        avg_consec_inference_gap = total_inference_gap/(frames_to_process - 1)
+        write_to_csv('vt.csv', metrics_headers, [split_point, flops, time, single_frame_time, left_output_size, avg_consec_inference_gap])
+        Logger.log(f'CONSECUTIVE INFERENCE GAP BETWEEN TWO FRAMES:: {avg_consec_inference_gap}')
         Logger.log(f'TOTAL TIME FOR PROCESSING:: {time} sec')
         Logger.log(f'TIME TAKEN FOR SINGLE FRAME:: {single_frame_time} sec')
         loop_event.set()
