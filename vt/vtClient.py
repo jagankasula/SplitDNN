@@ -45,6 +45,7 @@ total_handled_responses = 0
 
 # Total inference gap. Sum of the time gap between two consecutive inferences.
 total_inference_gap = 0
+prev_frame_end_time = None
 
 left_output_size = 0
 
@@ -75,7 +76,7 @@ def handle_response(response):
     global total_handled_responses
     global total_inference_gap
 
-    prev_frame_end_time = None
+    global prev_frame_end_time
 
     # Process the response here
     load_data = pickle.loads(response.body)
