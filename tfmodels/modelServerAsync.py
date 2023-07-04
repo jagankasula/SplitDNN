@@ -17,6 +17,10 @@ split_point = None
 with tf.device(device):
     model = my_models.get(current_model)
 
+    print('*************************************************')
+    print(tf.config.list_physical_devices(device_type=None))
+    print('**************************************************')
+
     #right_model = keras.Model(inputs=next_layer.input, outputs=model.output)
     right_model = None
 
