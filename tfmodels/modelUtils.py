@@ -6,12 +6,12 @@ import io
 import tensorflow as tf
 
 my_models = {
-    'resnet50': tf.keras.applications.ResNet50(include_top=True, weights="imagenet", input_tensor=None, input_shape=None, pooling=None, classes=1000,),
-    'resnet101': tf.keras.applications.ResNet101(include_top=True, weights="imagenet", input_tensor=None, input_shape=None, pooling=None, classes=1000,),
-    'VGG16': tf.keras.applications.VGG16(include_top=True, weights="imagenet", input_tensor=None, input_shape=None, pooling=None, classes=1000, classifier_activation="softmax",),
-    'VGG19': tf.keras.applications.VGG19(include_top=True, weights="imagenet", input_tensor=None, input_shape=None, pooling=None, classes=1000, classifier_activation="softmax",),
-    'DenseNet121': tf.keras.applications.DenseNet121(include_top=True, weights="imagenet", input_tensor=None, input_shape=None, pooling=None, classes=1000, classifier_activation="softmax",),
-    'DenseNet169': tf.keras.applications.DenseNet169(include_top=True, weights="imagenet", input_tensor=None, input_shape=None, pooling=None, classes=1000, classifier_activation="softmax",),
+    'resnet50': tf.keras.applications.ResNet50,
+    'resnet101': tf.keras.applications.ResNet101,
+    'VGG16': tf.keras.applications.VGG16,
+    'VGG19': tf.keras.applications.VGG19,
+    'DenseNet121': tf.keras.applications.DenseNet121,
+    'DenseNet169': tf.keras.applications.DenseNet169,
 }
 
 my_split_points = {

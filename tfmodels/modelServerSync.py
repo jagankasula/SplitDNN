@@ -15,14 +15,19 @@ current_model = config['model']
 split_point = None
 
 with tf.device(device):
-    model = my_models.get(current_model)
+  model = None
+  if current_model in {'resnet50', 'resnet101'}:
+      model = my_models.get(current_model, lambda: print(f"Model not present in my_models: {current_model}"))(include_top=True, weights="imagenet", input_tensor=None, input_shape=None, pooling=None, classes=1000,)
+  else:
+      model = my_models.get(current_model, lambda: print(f"Model not present in my_models: {current_model}"))(include_top=True, weights="imagenet", input_tensor=None, input_shape=None, pooling=None, classes=1000, classifier_activation="softmax",)
+  
 
-    print('*************************************************')
-    print(tf.config.list_physical_devices(device_type=None))
-    print('**************************************************')
+  print('*************************************************')
+  print(tf.config.list_physical_devices(device_type=None))
+  print('**************************************************')
 
-    #right_model = keras.Model(inputs=next_layer.input, outputs=model.output)
-    right_model = None
+  #right_model = keras.Model(inputs=next_layer.input, outputs=model.output)
+  right_model = None
 
 
 class ModelHandler(tornado.web.RequestHandler):

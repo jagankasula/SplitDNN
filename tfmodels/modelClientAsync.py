@@ -48,7 +48,11 @@ left_output_size = 0
 flops = 0
 
 with tf.device(device):
-  model = my_models.get(current_model)
+  model = None
+  if current_model in {'resnet50', 'resnet101'}:
+      model = my_models.get(current_model, lambda: print(f"Model not present in my_models: {current_model}"))(include_top=True, weights="imagenet", input_tensor=None, input_shape=None, pooling=None, classes=1000,)
+  else:
+      model = my_models.get(current_model, lambda: print(f"Model not present in my_models: {current_model}"))(include_top=True, weights="imagenet", input_tensor=None, input_shape=None, pooling=None, classes=1000, classifier_activation="softmax",)
   
   num_layers = len(model.layers)
   
