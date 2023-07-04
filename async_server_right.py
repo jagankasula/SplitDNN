@@ -60,8 +60,8 @@ class ModelHandler(tornado.web.RequestHandler):
     async def post(self):
         #data = json.loads(self.request.body)
             data =  pickle.loads(self.request.body)
-            json_dump_return_data = model_right(data)
-            self.write(json_dump_return_data)
+            json_dump_return_data = await model_right(data)
+            await self.write(json_dump_return_data)
 
 def model_right(data):
 

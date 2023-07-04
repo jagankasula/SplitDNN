@@ -1,4 +1,5 @@
 server - "KC-SCER-FCCT0M3"
+server ip - '134.193.129.157'
 
 pgrep -f your_script_name.py  --> to know process Id
 

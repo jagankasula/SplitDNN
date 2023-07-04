@@ -4,44 +4,18 @@ import tensorflow as tf
 import tornado.ioloop
 
 from tensorflow import keras
-from vit_keras import vit
-from vtutils import Config, Logger
+from modelUtils import Config, Logger, my_models
 
 
 # Read the configurations from the config file.
 config = Config.get_config()
 
 device = config['server_device']
-
+current_model = config['model']
 split_point = None
 
-import tensorflow as tf
-
-# Enable GPU memory growth
-gpus = tf.config.list_physical_devices('GPU')
-for gpu in gpus:
-    tf.config.experimental.set_memory_growth(gpu, True)
-
-# Monitor GPU memory usage
-for gpu in gpus:
-    memory_growth = tf.config.experimental.get_memory_growth(gpu)
-    print("Memory growth enabled for GPU:", gpu, "=", memory_growth)
-
-# Get GPU memory info
-for gpu in gpus:
-    memory_info = tf.config.experimental.get_memory_info(gpu)
-    print("Memory info for GPU:", gpu)
-    print("Total GPU memory (bytes):", memory_info)
-    print("Currently allocated GPU memory (bytes):", memory_info.current_allocated)
-    print("Peak allocated GPU memory (bytes):", memory_info.peak_allocated)
-    print("GPU memory free (bytes):", memory_info.total - memory_info.current_allocated)
-    print()
-
 with tf.device(device):
-    model = vit.build_model(image_size=224, patch_size=16, classes=1000, num_layers=19,
-                        hidden_size=768, num_heads=12, name= 'vit_custom', mlp_dim=3072,
-                        activation='softmax', include_top=True,
-                        representation_size=None)
+    model = my_models.get(current_model)
 
     #right_model = keras.Model(inputs=next_layer.input, outputs=model.output)
     right_model = None
@@ -55,8 +29,8 @@ class ModelHandler(tornado.web.RequestHandler):
             server_request_receive_timestamp = datetime.datetime.now()
             data =  pickle.loads(self.request.body)
             return_data = model_right(data)
-            # server_processing_timestamp = datetime.datetime.now()
-            # return_data['server_processing_time'] = (server_processing_timestamp - server_request_receive_timestamp).total_seconds()
+            server_processing_timestamp = datetime.datetime.now()
+            return_data['server_processing_time'] = (server_processing_timestamp - server_request_receive_timestamp).total_seconds()
             json_dump_return_data = pickle.dumps(return_data)
             self.write(json_dump_return_data)
 
@@ -93,8 +67,8 @@ def model_right(data):
        left_model_output = data['data']
 
         # Transformer layers start from layer 5 and the output of the layer is two tensors. But the next layer input is only first tensor.            
-       if split_point >= 5:
-            left_model_output = left_model_output[0]
+    #    if split_point >= 5:
+    #         left_model_output = left_model_output[0]
 
        frame_seq_no = data['frame_seq_no']
 

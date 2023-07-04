@@ -1,9 +1,8 @@
-from vit_keras import vit
 from tensorflow import keras
 from tornado import httpclient, ioloop
 from tornado.queues import Queue
 from PIL import Image
-from vtutils import Config, Logger, write_to_csv
+from modelUtils import Config, Logger, write_to_csv, get_flops, my_models, my_split_points
 from model_profiler import model_profiler
 
 import cv2
@@ -29,9 +28,8 @@ metrics_headers = ['split no.', 'flops', 'total_processing_time', 'single_frame_
 
 # Assign the configurations to the global variables.
 device = config['client_device']
-#split_point = config['split_point']
-split_point = 1
 url = config['url']
+current_model = config['model']
 frames_to_process = config['frames_to_process']
 
 # Initialize queue for storing the output of the frames that were processed on the client (left) side.
@@ -46,30 +44,29 @@ total_handled_responses = 0
 # Total inference gap. Sum of the time gap between two consecutive inferences.
 total_inference_gap = 0
 prev_frame_end_time = None
-
 left_output_size = 0
+flops = 0
 
 with tf.device(device):
-  model = vit.build_model(image_size=224, patch_size=16, classes=1000, num_layers=19,
-                        hidden_size=768, num_heads=12, name= 'vit_custom', mlp_dim=3072,
-                        activation='softmax', include_top=True,
-                        representation_size=None)
+  model = my_models.get(current_model)
   
-  print('***********************************************')
-  print(tf.config.list_physical_devices(device_type=None))
-  print('***********************************************')
+  num_layers = len(model.layers)
   
-  split_layer = model.layers[split_point]
+  split_points = my_split_points.get(current_model)
 
-  print(split_layer.name)
+  print('*************************************************')
+  print(tf.config.list_physical_devices(device_type=None))
+  print('**************************************************')
+  
+#   split_layer = model.layers[split_point]
+
+#   print(split_layer.name)
   
 #   profile = model_profiler(left_model, frames_to_process)
 
 #   df = pd.read_csv(io.StringIO(profile), sep='|', skiprows=0, skipinitialspace=True)
 
 #   df.columns = df.columns.str.strip()
-
-  flops = 0
 
 
 def handle_response(response):
@@ -108,7 +105,7 @@ def handle_response(response):
         avg_consec_inference_gap = total_inference_gap/(frames_to_process - 1)
         # Reset to zero for next loop.
         total_inference_gap = 0
-        write_to_csv('vt.csv', metrics_headers, [split_point, flops, time, single_frame_time, left_output_size, avg_consec_inference_gap])
+        write_to_csv(current_model + '_async.csv', metrics_headers, [split_point, flops, time, single_frame_time, left_output_size, avg_consec_inference_gap])
         Logger.log(f'CONSECUTIVE INFERENCE GAP BETWEEN TWO FRAMES:: {avg_consec_inference_gap}')
         Logger.log(f'TOTAL TIME FOR PROCESSING:: {time} sec')
         Logger.log(f'TIME TAKEN FOR SINGLE FRAME:: {single_frame_time} sec')
@@ -150,6 +147,9 @@ def convert_image_to_tensor(img):
     img_rgb = Image.fromarray(img).convert('RGB')
     tensor = tf.image.resize(img_rgb, [224, 224]) 
     tensor  = tf.expand_dims(tensor, axis=0)
+    print('****************')
+    print(tensor.shape)
+    print('****************')
 
     # strategy = tf.distribute.experimental.CentralStorageStrategy()
     # with strategy.scope():
@@ -207,11 +207,17 @@ async def main_runner():
 
     global split_point
 
-    for split_point in range(1, 22):
+    global flops
+
+    for split_point in split_points:
 
         print('SPLIT: ' + str(split_point))
 
         left_model = get_left_model(split_point)
+
+        profile = model_profiler(left_model, frames_to_process)
+
+        flops = get_flops(profile)
 
         # Request JSON.
         request_json = get_request_body(None, 0, split_point)
@@ -255,8 +261,8 @@ async def main_runner():
         # This is the end of the left processing. Set the end time of left video processing.
         end_time = datetime.datetime.now()
     
-        if split_point >= 5:
-            out_left = out_left[0]
+        # if split_point >= 5:
+        #     out_left = out_left[0]
         left_output_size = tf.size(out_left).numpy()
     
         Logger.log(f'[Inside main_runner] TOTAL TIME TAKEN FOR LEFT PROCESSING {frames_to_process} frames:: {end_time - start_time}')
@@ -266,7 +272,6 @@ async def main_runner():
 
         # Wait until all the responses for this split point are received and processed.
         await loop_event.wait()
-        split_point += 1
         total_handled_responses = 0
         loop_event.clear()
 
