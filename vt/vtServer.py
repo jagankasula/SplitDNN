@@ -20,6 +20,13 @@ gpus = tf.config.list_physical_devices('GPU')
 for gpu in gpus:
     tf.config.experimental.set_memory_growth(gpu, True)
 
+# Monitor GPU memory growth
+for gpu in gpus:
+    memory_growth = tf.config.experimental.get_memory_growth(gpu)
+    memory_fraction = tf.config.experimental.get_per_process_gpu_memory_fraction(gpu)
+    print("Memory growth enabled for GPU:", gpu, "=", memory_growth)
+    print("GPU memory fraction:", gpu, "=", memory_fraction)
+
 with tf.device(device):
     model = vit.build_model(image_size=224, patch_size=16, classes=1000, num_layers=19,
                         hidden_size=768, num_heads=12, name= 'vit_custom', mlp_dim=3072,
