@@ -15,6 +15,11 @@ device = config['server_device']
 
 split_point = None
 
+# Enable GPU memory growth
+gpus = tf.config.list_physical_devices('GPU')
+for gpu in gpus:
+    tf.config.experimental.set_memory_growth(gpu, True)
+
 with tf.device(device):
     model = vit.build_model(image_size=224, patch_size=16, classes=1000, num_layers=19,
                         hidden_size=768, num_heads=12, name= 'vit_custom', mlp_dim=3072,
