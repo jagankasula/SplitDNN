@@ -232,7 +232,7 @@ def main_runner():
 
         single_frame_communication_time = total_communication_time/frames_to_process
 
-        write_to_csv(current_model + '_sync.csv', metrics_headers, [split_point, flops, time, single_frame_time, left_output_size, total_communication_time, single_frame_communication_time, avg_consec_inference_gap])
+        write_to_csv('gpu_time_all_models' + '_sync.csv', metrics_headers, [split_point, flops, time, single_frame_time, left_output_size, total_communication_time, single_frame_communication_time, avg_consec_inference_gap])
         print('-------------------------------------------------------------------------------------------')
         Logger.log(f'TOTAL COMMUNICATION TIME FOR {frames_to_process} frames:: {total_communication_time}')
         Logger.log(f'COMMUNICATION TIME FOT SINGLE FRAME:: {single_frame_communication_time}')
