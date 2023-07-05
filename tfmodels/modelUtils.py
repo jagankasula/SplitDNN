@@ -5,6 +5,8 @@ import pandas as pd
 import io
 import tensorflow as tf
 
+from PIL import Image
+
 my_models = {
     'resnet50': tf.keras.applications.ResNet50,
     'resnet101': tf.keras.applications.ResNet101,
@@ -61,9 +63,13 @@ def write_to_csv(filename, field_names, data):
 def get_flops(profile):
 
     df = pd.read_csv(io.StringIO(profile), sep='|', skiprows=0, skipinitialspace=True)
-
     df.columns = df.columns.str.strip()
-
-    print(df)
-
     return df["Value"].values[2].strip()
+
+
+def convert_image_to_tensor(img):
+
+    img_rgb = Image.fromarray(img).convert('RGB')
+    tensor = tf.image.resize(img_rgb, [224, 224]) 
+    tensor  = tf.expand_dims(tensor, axis=0)
+    return tensor

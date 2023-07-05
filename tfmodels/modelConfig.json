@@ -1,6 +1,6 @@
 {
     "server": "KC-SCER-FCCT0M3",
-    "model": "VGG19",
+    "model": "DenseNet169",
     "client_device": "/CPU:0",
     "server_device": "/GPU:1",
     "frames_to_process": 50,
