@@ -21,48 +21,51 @@ model_name = config['model']
 # Get the model.
 model = None
 
-if model_name in {'resnet50', 'resnet101'}:
-    model = my_models.get(model_name, lambda: print(f"Model not present in my_models: {model_name}"))(include_top=True, weights="imagenet", input_tensor=None, input_shape=None, pooling=None, classes=1000,)
-else:
-    model = my_models.get(model_name, lambda: print(f"Model not present in my_models: {model_name}"))(include_top=True, weights="imagenet", input_tensor=None, input_shape=None, pooling=None, classes=1000, classifier_activation="softmax",)
+device = '/CPU:0'
 
-# Get layers from the model.
-layers = model.layers
+with tf.device(device):
+    if model_name in {'resnet50', 'resnet101'}:
+        model = my_models.get(model_name, lambda: print(f"Model not present in my_models: {model_name}"))(include_top=True, weights="imagenet", input_tensor=None, input_shape=None, pooling=None, classes=1000,)
+    else:
+        model = my_models.get(model_name, lambda: print(f"Model not present in my_models: {model_name}"))(include_top=True, weights="imagenet", input_tensor=None, input_shape=None, pooling=None, classes=1000, classifier_activation="softmax",)
 
-# Get layer count.
-num_layers = len(layers)
+    # Get layers from the model.
+    layers = model.layers
 
-# Profile the model.
-#profile = model_profiler(model, batch_size)
+    # Get layer count.
+    num_layers = len(layers)
 
-# Get flops from the profile.
-#flops = get_flops(profile)
-flops = 0
+    # Profile the model.
+    #profile = model_profiler(model, batch_size)
 
-# Read video input.
-cam = cv2.VideoCapture('hdvideo.mp4')
+    # Get flops from the profile.
+    #flops = get_flops(profile)
+    flops = 0
 
-# No. of frames processed.
-count = 1
+    # Read video input.
+    cam = cv2.VideoCapture('hdvideo.mp4')
 
-# Processing start time
-processing_start_time = datetime.datetime.now()
+    # No. of frames processed.
+    count = 1
 
-while count < batch_size + 1:
-    ret, img = cam.read() 
-    if ret:
-        tensor = convert_image_to_tensor(img)
-        output = model(tensor)
-        print(f'Processed frame # {count}')
-        print(output.shape)
-        count += 1
+    # Processing start time
+    processing_start_time = datetime.datetime.now()
 
-# Processing start time.
-processing_end_time = datetime.datetime.now()
+    while count < batch_size + 1:
+        ret, img = cam.read() 
+        if ret:
+            tensor = convert_image_to_tensor(img)
+            output = model(tensor)
+            print(f'Processed frame # {count}')
+            print(output.shape)
+            count += 1
 
-total_processing_time  = (processing_end_time - processing_start_time).total_seconds()
-single_frame_time = total_processing_time/batch_size
+    # Processing start time.
+    processing_end_time = datetime.datetime.now()
 
-# Write metrics to csv file.
-write_to_csv('model_cpu.csv', metrics_headers, [model_name, flops, num_layers, total_processing_time, single_frame_time])
+    total_processing_time  = (processing_end_time - processing_start_time).total_seconds()
+    single_frame_time = total_processing_time/batch_size
+
+    # Write metrics to csv file.
+    write_to_csv('model_cpu.csv', metrics_headers, [model_name, flops, num_layers, total_processing_time, single_frame_time])
 
