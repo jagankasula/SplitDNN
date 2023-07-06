@@ -1,4 +1,3 @@
-#%%
 import tensorflow as tf
 
 from PIL import Image
@@ -7,14 +6,14 @@ import pandas as pd
 import io
 from modelUtils import get_flops
 
-model = tf.keras.applications.VGG19()
+model = tf.keras.applications.EfficientNetV2S()
 
 profile = model_profiler(model, 50)
 
 print(profile)
 
 print(f'FLOPS::::: {get_flops(profile)}')
-#%%
+
 layers = model.layers
 
 def convert_image_to_tensor(img):
@@ -25,14 +24,14 @@ def convert_image_to_tensor(img):
     return tensor
 
 print(len(layers))
-#%%
+
 candidate_layers = []
 print('*****************')
 #print(candidate_layers)
 print('*****************')
 
 print(model_profiler(model, 50))
-#%%
+
 for split_point in range(1, len(layers) - 1):
     split_layer = model.layers[split_point]
     next_layer = model.layers[split_point + 1]
