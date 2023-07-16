@@ -1,3 +1,4 @@
+#%%
 import tensorflow as tf
 
 from PIL import Image
@@ -17,12 +18,13 @@ model = tf.keras.applications.EfficientNetV2B0(
     include_preprocessing=True,
 )
     
-
+print(print(model.summary()))
+#%%
 profile = model_profiler(model, 50)
 
 
 print(profile)
-
+#%%
 print(f'FLOPS::::: {get_flops(profile)}')
 
 layers = model.layers

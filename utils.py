@@ -58,7 +58,7 @@ def get_left_modules(split_point, model):
 def get_right_modules(split_point, model):
     all_modules = get_all_modules(model)
     all_modules = nn.Sequential(*all_modules)
-    right_modules = list(all_modules.children())[split_point:]
+    right_modules = list(all_modules.children())[split_point: -1]
     print(f'No. right modules: {len(right_modules)}')
     right_modules = nn.Sequential(*right_modules)
     return right_modules

@@ -41,6 +41,7 @@ class Logger():
         time = datetime.datetime.now()
         print(f"{time}::{message}")
 
+
 def write_to_csv(filename, field_names, data):
     # Check if the file exists
     file_exists = False
@@ -62,16 +63,39 @@ def write_to_csv(filename, field_names, data):
         # Write the data to the file
         writer.writerow(data)
 
-def get_flops(profile):
 
+def get_flops(profile):
     df = pd.read_csv(io.StringIO(profile), sep='|', skiprows=0, skipinitialspace=True)
     df.columns = df.columns.str.strip()
     return df["Value"].values[2].strip()
 
 
 def convert_image_to_tensor(img):
-
     img_rgb = Image.fromarray(img).convert('RGB')
     tensor = tf.image.resize(img_rgb, [224, 224]) 
     tensor  = tf.expand_dims(tensor, axis=0)
     return tensor
+
+def dry_run_left_model(model):
+    input = tf.random.uniform(shape=(1, 224, 224, 3))
+    output = model(input)
+    print('Dry run for LEFT model is completed.')
+    print(output.shape)
+    return output
+
+def dry_run_right_model(left_model, right_model):
+    left_output = dry_run_left_model(left_model)
+    output = right_model(left_output)
+    print('Dry run for RIGHT model is completed.')
+    print(output.shape)
+    return output
+
+def get_model(model_name):
+    if model_name in {'resnet50', 'resnet101'}:
+        model = my_models.get(model_name, lambda: print(f"Model not present in my_models: {model_name}"))(include_top=True, weights="imagenet", input_tensor=None, input_shape=None, pooling=None, classes=1000,)
+    elif model_name in {'EfficientNetV2B0'}:
+        model = my_models.get(model_name, lambda: print(f"Model not present in my_models: {model_name}"))(include_top=True, weights="imagenet", input_tensor=None, input_shape=None, pooling=None, classes=1000, classifier_activation="softmax", include_preprocessing=True,)
+    else:
+        model = my_models.get(model_name, lambda: print(f"Model not present in my_models: {model_name}"))(include_top=True, weights="imagenet", input_tensor=None, input_shape=None, pooling=None, classes=1000, classifier_activation="softmax",)
+    return model
+  

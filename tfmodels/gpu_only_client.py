@@ -1,3 +1,5 @@
+# Run modelServerSync before running this code.
+
 import cv2
 import datetime
 import pickle
@@ -18,7 +20,8 @@ warnings.filterwarnings('ignore')
 # Read the configurations from the config file.
 config = Config.get_config()
 
-metrics_headers = ['split_no', 'flops', 'total_processing_time', 'single_frame_time', 'left_output_size', 'total_communication_time', 'single_frame_communication_time', 'avg_consec_inference_gap', 'total_left_model_time', 'total_right_model_time']
+#metrics_headers = ['split_no', 'flops', 'total_processing_time', 'single_frame_time', 'left_output_size', 'total_communication_time', 'single_frame_communication_time', 'avg_consec_inference_gap']
+metrics_headers = ['model_name','split_no','flops','total_processing_time','single_frame_time','left_output_size','total_communication_time','single_frame_communication_time','avg_consec_inference_gap']
 
 # Assign the configurations to the global variables.
 device = config['client_device']
@@ -35,7 +38,6 @@ start_time = None
 client_request_time = None
 server_response_time= None
 total_communication_time = 0
-total_left_model_time = 0
 
 # Total inference gap. Sum of the time gap between two consecutive inferences.
 total_inference_gap = 0
@@ -64,6 +66,9 @@ def convert_image_to_tensor(img):
     img_rgb = Image.fromarray(img).convert('RGB')
     tensor = tf.image.resize(img_rgb, [224, 224]) 
     tensor  = tf.expand_dims(tensor, axis=0)
+    # strategy = tf.distribute.experimental.CentralStorageStrategy()
+    # with strategy.scope():
+    #     gpu_tensor = tf.constant(tensor)
     return tensor
 
 def get_left_model(split_point):    
@@ -104,17 +109,6 @@ def set_total_communication_time(server_processing_time):
     communication_time = (server_response_time - client_request_time).total_seconds() - server_processing_time
     total_communication_time += communication_time
 
-def add_to_total_left_model_time(current_frame_exec_time):
-   global total_left_model_time
-   total_left_model_time += current_frame_exec_time
-
-def get_total_right_model_time():
-    request_json = get_request_body(None, 0, split_point)
-    response = send_request(request_json, 'right_model_time')
-    response_body = pickle.loads(response.body)
-    total_right_model_time = response_body['total_right_model_time']
-    return total_right_model_time
-
 def main_runner():
     global split_point
     global flops
@@ -154,10 +148,7 @@ def main_runner():
             if ret:                 
                 Logger.log(f'[Inside main_runner] Frame # {frame_seq_no}: Send for left processing.')    
                 # Send the frame for left processing.
-                left_model_start_time = datetime.datetime.now()
                 out_left = producer_video_left(img_rbg, left_model)
-                left_model_end_time = datetime.datetime.now()
-                add_to_total_left_model_time((left_model_end_time - left_model_start_time).total_seconds())
                 # Request JSON.
                 request_json = get_request_body(out_left, frame_seq_no, split_point)
                 # Send request to server for processing.
@@ -187,9 +178,9 @@ def main_runner():
         time = (end_time - start_time).total_seconds()
         single_frame_time = time/frames_to_process
         single_frame_communication_time = total_communication_time/frames_to_process
-        total_right_model_time = get_total_right_model_time()
 
-        write_to_csv(model_name + '_sync.csv', metrics_headers, [split_point, flops, time, single_frame_time, left_output_size, total_communication_time, single_frame_communication_time, avg_consec_inference_gap, total_left_model_time, total_right_model_time])
+        #write_to_csv(model_name + '_sync.csv', metrics_headers, [split_point, flops, time, single_frame_time, left_output_size, total_communication_time, single_frame_communication_time, avg_consec_inference_gap])
+        write_to_csv('gpu_time_all_models' + '_sync.csv', metrics_headers, [model_name, split_point, flops, time, single_frame_time, left_output_size, total_communication_time, single_frame_communication_time, avg_consec_inference_gap])
         print('-------------------------------------------------------------------------------------------')
         Logger.log(f'TOTAL COMMUNICATION TIME FOR {frames_to_process} frames:: {total_communication_time}')
         Logger.log(f'COMMUNICATION TIME FOT SINGLE FRAME:: {single_frame_communication_time}')
