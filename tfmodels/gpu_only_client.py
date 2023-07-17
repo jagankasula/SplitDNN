@@ -51,7 +51,7 @@ flops = 0
 with tf.device(device):
   model = get_model(model_name)
   
-  split_points = my_split_points.get(model_name)
+  split_points = [0]
   print('*************************************************')
   print(tf.config.list_physical_devices(device_type=None))
   print('**************************************************')
