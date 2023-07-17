@@ -4,8 +4,8 @@ import io
 import tensorflow as tf
 import datetime
 
-#from model_profiler import model_profiler
-from modelUtils import Config, convert_image_to_tensor, write_to_csv, my_models
+from model_profiler import model_profiler
+from modelUtils import Config, convert_image_to_tensor, get_flops, write_to_csv, my_models
 
 #Metrics
 metrics_headers = ['Model', 'flops', 'num_layers', 'total_processing_time', 'single_frame_time']
@@ -38,11 +38,11 @@ with tf.device(device):
     num_layers = len(layers)
 
     # Profile the model.
-    #profile = model_profiler(model, batch_size)
+    profile = model_profiler(model, batch_size)
 
     # Get flops from the profile.
-    #flops = get_flops(profile)
-    flops = 0
+    flops = get_flops(profile)
+    #flops = 0
 
     # Read video input.
     cam = cv2.VideoCapture('hdvideo.mp4')
