@@ -138,7 +138,8 @@ def main_runner():
         global left_output_size
         global total_communication_time
         global prev_frame_end_time
-        global total_inference_gap        
+        global total_inference_gap
+        global total_left_model_time      
     
         # Read the input from the file.
         cam = cv2.VideoCapture('hdvideo.mp4')
