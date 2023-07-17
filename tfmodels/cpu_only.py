@@ -1,7 +1,7 @@
-import tensorflow as tf
+import cv2
 import pandas as pd 
 import io
-import cv2
+import tensorflow as tf
 import datetime
 
 #from model_profiler import model_profiler
