@@ -19,7 +19,8 @@ from model_profiler import model_profiler
 io.StringIO
 warnings.filterwarnings('ignore')
 
-loop_event = tornado.locks.Event()
+split_point_loop_event = tornado.locks.Event()
+right_model_time_loop_event = tornado.locks.Event()
 
 # Read the configurations from the config file.
 config = Config.get_config()
@@ -91,7 +92,7 @@ def handle_response(response):
         Logger.log(f'CONSECUTIVE INFERENCE GAP BETWEEN TWO FRAMES:: {avg_consec_inference_gap}')
         Logger.log(f'TOTAL TIME FOR PROCESSING:: {time} sec')
         Logger.log(f'TIME TAKEN FOR SINGLE FRAME:: {single_frame_time} sec')
-        loop_event.set()
+        split_point_loop_event.set()
         
       
 async def consumer():
@@ -216,9 +217,9 @@ async def main_runner():
         cv2.destroyAllWindows()
 
         # Wait until all the responses for this split point are received and processed.
-        await loop_event.wait()
+        await split_point_loop_event.wait()
         total_handled_responses = 0
-        loop_event.clear()
+        split_point_loop_event.clear()
 
 
 with tf.device(device):
