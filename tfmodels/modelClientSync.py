@@ -199,6 +199,7 @@ def main_runner():
         print('-------------------------------------------------------------------------------------------')
 
         total_communication_time = 0
+        total_left_model_time = 0
 
         cam.release()
         cv2.destroyAllWindows()

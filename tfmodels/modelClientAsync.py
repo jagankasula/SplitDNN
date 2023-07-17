@@ -7,7 +7,6 @@ import numpy as np
 import pandas as pd
 import warnings
 import io
-import asyncio
 
 from tensorflow import keras
 from tornado import httpclient, ioloop
@@ -19,7 +18,7 @@ from model_profiler import model_profiler
 io.StringIO
 warnings.filterwarnings('ignore')
 
-split_point_loop_event = tornado.locks.Event()
+all_responses_loop_event = tornado.locks.Event()
 right_model_time_loop_event = tornado.locks.Event()
 
 # Read the configurations from the config file.
@@ -44,6 +43,7 @@ total_handled_responses = 0
 # Total inference gap. Sum of the time gaps between two consecutive inferences.
 total_inference_gap = 0
 total_left_model_time = 0
+total_right_model_time  = 0
 prev_frame_end_time = None
 left_output_size = 0
 flops = 0
@@ -55,7 +55,6 @@ with tf.device(device):
   print('*************************************************')
   print(tf.config.list_physical_devices(device_type=None))
   print('**************************************************')  
-
 
 def handle_response(response):
     global total_handled_responses
@@ -87,19 +86,24 @@ def handle_response(response):
         avg_consec_inference_gap = total_inference_gap/(frames_to_process - 1)
         # Reset to zero for next loop.
         total_inference_gap = 0
-        total_right_model_time = get_total_right_model_time()
-        write_to_csv(model_name + '_async.csv', metrics_headers, [split_point, flops, time, single_frame_time, left_output_size, avg_consec_inference_gap, total_left_model_time, total_right_model_time])
-        Logger.log(f'CONSECUTIVE INFERENCE GAP BETWEEN TWO FRAMES:: {avg_consec_inference_gap}')
-        Logger.log(f'TOTAL TIME FOR PROCESSING:: {time} sec')
-        Logger.log(f'TIME TAKEN FOR SINGLE FRAME:: {single_frame_time} sec')
-        split_point_loop_event.set()
+        request_total_right_model_time_from_server()
+        log_metrics(split_point, flops, time, single_frame_time, left_output_size, avg_consec_inference_gap, total_left_model_time)
+
+def log_metrics(split_point, flops, time, single_frame_time, left_output_size, avg_consec_inference_gap, total_left_model_time):
+    right_model_time_loop_event.wait()
+    write_to_csv(model_name + '_async.csv', metrics_headers, [split_point, flops, time, single_frame_time, left_output_size, avg_consec_inference_gap, total_left_model_time, total_right_model_time])
+    Logger.log(f'CONSECUTIVE INFERENCE GAP BETWEEN TWO FRAMES:: {avg_consec_inference_gap}')
+    Logger.log(f'PROCESSING TIME FOR SINGLE FRAME:: {single_frame_time} sec')
+    Logger.log(f'TOTAL LEFT PROCESSING TIME:: {total_left_model_time}')
+    Logger.log(f'TOTAL RIGHT PROCESSING TIME:: {total_right_model_time}')
+    Logger.log(f'TOTAL PROCESSING TIME:: {time} sec')
+    right_model_time_loop_event.clear()
+    all_responses_loop_event.set()
         
-      
 async def consumer():
     http_client = httpclient.AsyncHTTPClient(defaults=dict(connect_timeout = 10000000.0 ,request_timeout=100000000000.0))
     
     async for item in q:
-
         try:   
             Logger.log(f'[Inside consumer] Frame # {item[1]}: Preparing body to send request to server.')
             post_data = {'data': item[0], 'frame_seq_no': item[1]} # item[0] = out_left, item[1] = frame_seq_no
@@ -111,14 +115,18 @@ async def consumer():
         finally:
             q.task_done()
 
-async def get_total_right_model_time():
+def request_total_right_model_time_from_server():
     request_json = get_request_body(None, 0, split_point)
     http_client = httpclient.AsyncHTTPClient(defaults=dict(connect_timeout = 10000000.0 ,request_timeout=100000000000.0))
     body = pickle.dumps(request_json) 
     response = http_client.fetch(url + 'right_model_time',  method = 'POST', headers = None, body = body)
+    response.add_done_callback(lambda f: set_total_right_model_time(f.result()))
+
+def set_total_right_model_time(response):
+    global total_right_model_time
     response_body = pickle.loads(response.body)
-    total_right_model_time =  response_body['total_right_model_time']
-    return  total_right_model_time
+    total_right_model_time = response_body['total_right_model_time']
+    right_model_time_loop_event.set()
 
 def producer_video_left(img, left_model):
     tensor = convert_image_to_tensor(img)
@@ -184,7 +192,6 @@ async def main_runner():
 
         frame_seq_no = 1
         global start_time
-        global frame_count
         global left_output_size
         global total_handled_responses
         global total_left_model_time    
@@ -217,9 +224,9 @@ async def main_runner():
         cv2.destroyAllWindows()
 
         # Wait until all the responses for this split point are received and processed.
-        await split_point_loop_event.wait()
+        await all_responses_loop_event.wait()
         total_handled_responses = 0
-        split_point_loop_event.clear()
+        all_responses_loop_event.clear()
 
 
 with tf.device(device):

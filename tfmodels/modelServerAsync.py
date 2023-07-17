@@ -92,7 +92,7 @@ def get_total_right_model_time(data):
         # Reset time for next split point.
         total_right_model_time = 0        
     else:
-        return_data = {'total_right_model_time': 'split point mismatch'}
+        return_data = {'total_right_model_time': f'split point mismatch. Expected {split_point} but received {client_split_point}.'}
     return pickle.dumps(return_data)
 
 
