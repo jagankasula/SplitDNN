@@ -9,7 +9,7 @@ from tensorflow import keras
 from tornado import httpclient
 from tornado.queues import Queue
 from PIL import Image
-from modelUtils import Config, Logger, write_to_csv, get_flops, dry_run_left_model, get_model, my_split_points
+from modelUtils import Config, Logger, write_to_csv, get_flops, dry_run_left_model, get_model, input_size, convert_image_to_tensor, my_split_points
 from model_profiler import model_profiler
 
 io.StringIO
@@ -54,17 +54,11 @@ with tf.device(device):
   print(tf.config.list_physical_devices(device_type=None))
   print('**************************************************')
 
-        
 def producer_video_left(img, left_model):
-    tensor = convert_image_to_tensor(img)
+    size = input_size.get(model_name)
+    tensor = convert_image_to_tensor(img, size)
     out_left = left_model(tensor)    
     return out_left
-
-def convert_image_to_tensor(img):
-    img_rgb = Image.fromarray(img).convert('RGB')
-    tensor = tf.image.resize(img_rgb, [224, 224]) 
-    tensor  = tf.expand_dims(tensor, axis=0)
-    return tensor
 
 def get_left_model(split_point):    
     split_layer = model.layers[split_point]
@@ -122,7 +116,7 @@ def main_runner():
     for split_point in split_points:
         print('SPLIT: ' + str(split_point))
         left_model = get_left_model(split_point)
-        dry_run_left_model(left_model)
+        dry_run_left_model(left_model, input_size.get(model_name))
         profile = model_profiler(left_model, frames_to_process)
         flops = get_flops(profile)
         # Request JSON.

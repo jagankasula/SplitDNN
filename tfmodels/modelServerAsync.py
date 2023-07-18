@@ -4,7 +4,7 @@ import tensorflow as tf
 import tornado.ioloop
 
 from tensorflow import keras
-from modelUtils import Config, Logger, get_model, dry_run_right_model
+from modelUtils import Config, Logger, get_model, dry_run_right_model, input_size
 
 
 # Read the configurations from the config file.
@@ -68,7 +68,7 @@ def set_model_right(data):
     next_layer = model.layers[split_point + 1]
     print(f'Starting from layer # {split_point + 1} in server. Layer name: {next_layer.name}')
     right_model = keras.Model(inputs=next_layer.input, outputs=model.output)
-    dry_run_right_model(left_model, right_model)
+    dry_run_right_model(left_model, right_model, input_size.get(model_name))
     return pickle.dumps('Right model is ready.')
 
 def model_right(data):   

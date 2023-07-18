@@ -7,7 +7,7 @@ import pandas as pd
 import io
 from modelUtils import get_flops
 
-model = tf.keras.applications.EfficientNetV2B0(
+model =tf.keras.applications.EfficientNetV2L(
     include_top=True,
     weights="imagenet",
     input_tensor=None,
@@ -57,7 +57,7 @@ for split_point in range(1, len(layers) - 1):
     try:         
         right_model = tf.keras.Model(inputs=next_layer.input, outputs=model.output)
 
-        input = tf.random.uniform(shape=(1, 224, 224, 3))
+        input = tf.random.uniform(shape=(1, 480, 480, 3))
         left_output = left_model(input)
         right_output = right_model(left_output)
         print(f'Success at split point # {split_point}, Name: {split_layer.name}')
