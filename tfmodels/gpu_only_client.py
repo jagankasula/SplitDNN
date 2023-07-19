@@ -108,7 +108,7 @@ def main_runner():
     for split_point in split_points:
         print('SPLIT: ' + str(split_point))
         left_model = get_left_model(split_point)
-        dry_run_left_model(left_model)
+        dry_run_left_model(left_model, input_size.get(model_name))
         profile = model_profiler(left_model, frames_to_process)
         flops = get_flops(profile)
         # Request JSON.
