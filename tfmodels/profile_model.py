@@ -1,9 +1,9 @@
 import tensorflow as tf
-from tensorflow.python.keras.utils import tf_utils
+import time
 
-# Load the ConvNeXtSmall model
-convnext_model = tf.keras.applications.ConvNeXtSmall(
-    model_name="convnext_small",
+# Load the ConvNeXtTiny model
+model = tf.keras.applications.ConvNeXtTiny(
+    model_name="convnext_tiny",
     include_top=True,
     include_preprocessing=True,
     weights="imagenet",
@@ -13,29 +13,52 @@ convnext_model = tf.keras.applications.ConvNeXtSmall(
     classes=1000,
     classifier_activation="softmax",
 )
+
 # Assuming you have a list of 50 frames (images), you need to preprocess them as needed
 # Replace 'frames' with your actual input data
-frames = tf.random.uniform(shape=(50, 224, 224, 3))  # Replace this with your 50 frames
+frame = tf.random.uniform(shape=(1, 224, 224, 3))  # Replace this with your 50 frames
 
 # Prepare the input data (assuming it's a NumPy array or a list of arrays)
-input_data = tf.keras.applications.convnext.preprocess_input(frames)
+input_data = tf.keras.applications.convnext.preprocess_input(frame)
 
-# Run a forward pass once to build the graph and compute FLOPs
-@tf.function
-def compute_flops():
-    return convnext_model(input_data[:1])
+# Create a batch of 50 frames for profiling
+batch_size = 50
+input_batch = tf.concat([input_data] * batch_size, axis=0)
 
-# Use TensorFlow Profiler to get FLOPs information
-tf.profiler.experimental.start(logdir=None)
-compute_flops()
-tf.profiler.experimental.stop()
+# Run a forward pass once to build the graph (optional, for more accurate profiling)
+_ = model(input_batch[:1])
 
-# Get the FLOPs from the profiler
-flops = tf_utils.model_flops(convnext_model)
+# Profile the model for batch size of 50 frames
+start_time = time.time()
+predictions = model(input_batch)
+end_time = time.time()
 
-# Compute the FLOPs for 50 frames (since it's the same for all frames)
-num_frames = 50
-total_flops = flops * num_frames
+# Calculate the total execution time for the batch of 50 frames
+total_time = end_time - start_time
+average_time_per_frame = total_time / batch_size
 
-print(f"Total FLOPs for {num_frames} frames: {total_flops:.2f}")
-print(f"FLOPs per frame: {total_flops/num_frames:.2f}")
+print(f"Total execution time for batch size of {batch_size}: {total_time:.2f} seconds.")
+print(f"Average time per frame: {average_time_per_frame:.4f} seconds.")
+
+#%%
+import tensorflow as tf
+
+# Load your TensorFlow model here
+model = tf.keras.applications.MobileNetV2()
+
+# Create a synthetic input batch with shape (50, input_height, input_width, num_channels)
+input_batch = tf.random.uniform((50, 224, 224, 3))
+
+# Run the profiler to get profiling information
+with tf.profiler.experimental.Profile('/tmp/profiler'):
+    model(input_batch)
+
+# Read the profiling information
+profile_log_path = '/tmp/profiler'
+profile_ctx = tf.profiler.experimental.Profiler(profile_log_path)
+profile_ctx.parse()
+
+# Calculate the FLOPs from the profiling results
+flops = tf.profiler.profile(profile_ctx, cmd='op', options=tf.profiler.ProfileOptionBuilder.float_operation())
+print("Estimated FLOPs for 50 inputs:", flops.total_float_ops)
+# %%

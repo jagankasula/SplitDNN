@@ -7,7 +7,7 @@ import pandas as pd
 import io
 from modelUtils import get_flops
 
-model =tf.keras.applications.EfficientNetV2L(
+model = tf.keras.applications.Xception(
     include_top=True,
     weights="imagenet",
     input_tensor=None,
@@ -15,10 +15,9 @@ model =tf.keras.applications.EfficientNetV2L(
     pooling=None,
     classes=1000,
     classifier_activation="softmax",
-    include_preprocessing=True,
 )
     
-print(print(model.summary()))
+# print(print(model.summary()))
 #%%
 profile = model_profiler(model, 50)
 
@@ -57,7 +56,7 @@ for split_point in range(1, len(layers) - 1):
     try:         
         right_model = tf.keras.Model(inputs=next_layer.input, outputs=model.output)
 
-        input = tf.random.uniform(shape=(1, 480, 480, 3))
+        input = tf.random.uniform(shape=(1, 299, 299, 3))
         left_output = left_model(input)
         right_output = right_model(left_output)
         print(f'Success at split point # {split_point}, Name: {split_layer.name}')
@@ -70,10 +69,12 @@ for split_point in range(1, len(layers) - 1):
         candidate_layers.append(split_point)
     except ValueError as vrr:
         print(f'------- Failed at split point # {split_point}, Name: {split_layer.name}')
-        #print(vrr)
+        # print(vrr)
+        # break
     except Exception as e:
         print(f'------- EXCEPTION -- Failed at split point # {split_point}, Name: {split_layer.name}')
-        #print(e)
+        # print(e)
+        # break
 
 print(candidate_layers)
 

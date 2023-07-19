@@ -5,7 +5,7 @@ import tensorflow as tf
 import datetime
 
 from model_profiler import model_profiler
-from modelUtils import Config, convert_image_to_tensor, get_flops, write_to_csv, my_models
+from modelUtils import Config, convert_image_to_tensor, get_flops, write_to_csv, my_models, input_size
 
 #Metrics
 metrics_headers = ['Model', 'flops', 'num_layers', 'total_processing_time', 'single_frame_time']
@@ -26,7 +26,7 @@ device = '/CPU:0'
 with tf.device(device):
     if model_name in {'resnet50', 'resnet101'}:
         model = my_models.get(model_name, lambda: print(f"Model not present in my_models: {model_name}"))(include_top=True, weights="imagenet", input_tensor=None, input_shape=None, pooling=None, classes=1000,)
-    elif model_name in {'EfficientNetV2B0'}:
+    elif model_name in {'EfficientNetV2B0', 'EfficientNetV2L'}:
         model = my_models.get(model_name, lambda: print(f"Model not present in my_models: {model_name}"))(include_top=True, weights="imagenet", input_tensor=None, input_shape=None, pooling=None, classes=1000, classifier_activation="softmax", include_preprocessing=True,)
     else:
         model = my_models.get(model_name, lambda: print(f"Model not present in my_models: {model_name}"))(include_top=True, weights="imagenet", input_tensor=None, input_shape=None, pooling=None, classes=1000, classifier_activation="softmax",)
@@ -56,7 +56,7 @@ with tf.device(device):
     while count < batch_size + 1:
         ret, img = cam.read() 
         if ret:
-            tensor = convert_image_to_tensor(img)
+            tensor = convert_image_to_tensor(img, input_size.get(model_name))
             output = model(tensor)
             print(f'Processed frame # {count}')
             print(output.shape)

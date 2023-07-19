@@ -11,7 +11,7 @@ from tensorflow import keras
 from tornado import httpclient
 from tornado.queues import Queue
 from PIL import Image
-from modelUtils import Config, Logger, write_to_csv, get_flops, dry_run_left_model, get_model, my_split_points
+from modelUtils import Config, Logger, write_to_csv, get_flops, dry_run_left_model, get_model, input_size, convert_image_to_tensor
 from model_profiler import model_profiler
 
 io.StringIO
@@ -58,18 +58,10 @@ with tf.device(device):
 
         
 def producer_video_left(img, left_model):
-    tensor = convert_image_to_tensor(img)
+    tensor = convert_image_to_tensor(img, input_size.get(model_name))
     out_left = left_model(tensor)    
     return out_left
 
-def convert_image_to_tensor(img):
-    img_rgb = Image.fromarray(img).convert('RGB')
-    tensor = tf.image.resize(img_rgb, [224, 224]) 
-    tensor  = tf.expand_dims(tensor, axis=0)
-    # strategy = tf.distribute.experimental.CentralStorageStrategy()
-    # with strategy.scope():
-    #     gpu_tensor = tf.constant(tensor)
-    return tensor
 
 def get_left_model(split_point):    
     split_layer = model.layers[split_point]
