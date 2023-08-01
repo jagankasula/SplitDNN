@@ -9,3 +9,5 @@ __pycache__/
 *.R
 *.RData
 *.Rhistory
+*.jpeg
+*.png
