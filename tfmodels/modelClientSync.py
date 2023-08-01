@@ -18,7 +18,7 @@ warnings.filterwarnings('ignore')
 # Read the configurations from the config file.
 config = Config.get_config()
 
-metrics_headers = ['split_no', 'flops', 'total_processing_time', 'single_frame_time', 'left_output_size', 'total_communication_time', 'single_frame_communication_time', 'avg_consec_inference_gap', 'total_left_model_time', 'total_right_model_time']
+metrics_headers = ['frames_to_process', 'split_no', 'flops', 'total_processing_time', 'single_frame_time', 'left_output_size', 'total_communication_time', 'single_frame_communication_time', 'avg_consec_inference_gap', 'total_left_model_time', 'total_right_model_time']
 
 # Assign the configurations to the global variables.
 device = config['client_device']
@@ -184,7 +184,7 @@ def main_runner():
         single_frame_communication_time = total_communication_time/frames_to_process
         total_right_model_time = get_total_right_model_time()
 
-        write_to_csv(model_name + '_sync' + str(frames_to_process) + '.csv', metrics_headers, [split_point, flops, time, single_frame_time, left_output_size, total_communication_time, single_frame_communication_time, avg_consec_inference_gap, total_left_model_time, total_right_model_time])
+        write_to_csv(model_name + '_sync' + 'trends' + '.csv', metrics_headers, [frames_to_process, split_point, flops, time, single_frame_time, left_output_size, total_communication_time, single_frame_communication_time, avg_consec_inference_gap, total_left_model_time, total_right_model_time])
         print('-------------------------------------------------------------------------------------------')
         Logger.log(f'TOTAL COMMUNICATION TIME FOR {frames_to_process} frames:: {total_communication_time}')
         Logger.log(f'COMMUNICATION TIME FOT SINGLE FRAME:: {single_frame_communication_time}')
