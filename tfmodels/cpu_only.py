@@ -21,7 +21,7 @@ model_name = config['model']
 # Get the model.
 model = None
 
-device = '/CPU:0'
+device = '/GPU:0'
 
 with tf.device(device):
     if model_name in {'resnet50', 'resnet101'}:
