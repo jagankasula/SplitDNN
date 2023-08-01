@@ -91,7 +91,7 @@ def handle_response(response):
 
 def log_metrics(split_point, flops, time, single_frame_time, left_output_size, avg_consec_inference_gap, total_left_model_time):
     right_model_time_loop_event.wait()
-    write_to_csv(model_name + '_async' + frames_to_process + '.csv', metrics_headers, [split_point, flops, time, single_frame_time, left_output_size, avg_consec_inference_gap, total_left_model_time, total_right_model_time])
+    write_to_csv(model_name + '_async' + str(frames_to_process) + '.csv', metrics_headers, [split_point, flops, time, single_frame_time, left_output_size, avg_consec_inference_gap, total_left_model_time, total_right_model_time])
     Logger.log(f'CONSECUTIVE INFERENCE GAP BETWEEN TWO FRAMES:: {avg_consec_inference_gap}')
     Logger.log(f'PROCESSING TIME FOR SINGLE FRAME:: {single_frame_time} sec')
     Logger.log(f'TOTAL LEFT PROCESSING TIME:: {total_left_model_time}')
