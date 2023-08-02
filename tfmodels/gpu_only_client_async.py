@@ -23,7 +23,7 @@ right_model_time_loop_event = tornado.locks.Event()
 
 # Read the configurations from the config file.
 config = Config.get_config()
-metrics_headers = ['frames_to_process', 'split_no', 'flops', 'total_processing_time', 'single_frame_time', 'left_output_size', 'avg_consec_inference_gap', 'total_left_model_time', 'total_right_model_time']
+metrics_headers = ['model_name', 'frames_to_process', 'split_no', 'total_processing_time', 'single_frame_time', 'left_output_size', 'avg_consec_inference_gap', 'total_left_model_time', 'total_right_model_time']
 
 # Assign the configurations to the global variables.
 device = config['client_device']
