@@ -46,7 +46,6 @@ total_left_model_time = 0
 total_right_model_time  = 0
 prev_frame_end_time = None
 left_output_size = 0
-flops = 0
 
 with tf.device(device):
   model = get_model(model_name)
@@ -87,11 +86,11 @@ def handle_response(response):
         # Reset to zero for next loop.
         total_inference_gap = 0
         request_total_right_model_time_from_server()
-        log_metrics(split_point, flops, time, single_frame_time, left_output_size, avg_consec_inference_gap, total_left_model_time)
+        log_metrics(split_point, time, single_frame_time, left_output_size, avg_consec_inference_gap, total_left_model_time)
 
-def log_metrics(split_point, flops, time, single_frame_time, left_output_size, avg_consec_inference_gap, total_left_model_time):
+def log_metrics(split_point, time, single_frame_time, left_output_size, avg_consec_inference_gap, total_left_model_time):
     right_model_time_loop_event.wait()
-    write_to_csv(model_name + '_async' + '.csv', metrics_headers, [frames_to_process, split_point, flops, time, single_frame_time, left_output_size, avg_consec_inference_gap, total_left_model_time, total_right_model_time])
+    write_to_csv('model_gpu' + '.csv', metrics_headers, [model_name, frames_to_process, split_point, time, single_frame_time, left_output_size, avg_consec_inference_gap, total_left_model_time, total_right_model_time])
     Logger.log(f'CONSECUTIVE INFERENCE GAP BETWEEN TWO FRAMES:: {avg_consec_inference_gap}')
     Logger.log(f'PROCESSING TIME FOR SINGLE FRAME:: {single_frame_time} sec')
     Logger.log(f'TOTAL LEFT PROCESSING TIME:: {total_left_model_time}')
